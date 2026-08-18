@@ -1,0 +1,15 @@
+# Dependencias y build
+node_modules/
+dist/
+*.log
+
+# Sentinel y herramientas de calidad
+.sentinel/
+.quality-reports/
+.quality-tools/
+.sentinel-report.md
+
+# Entorno
+.env
+.env.*
+!.env.example

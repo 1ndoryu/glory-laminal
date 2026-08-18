@@ -1,0 +1,41 @@
+/*
+  Tokens de diseño centralizados, inspirados en el tema oscuro por defecto de Blender.
+  Ningún componente debe declarar colores, fuentes ni tamaños literales: usa estas variables.
+*/
+:root {
+  /* Superficies */
+  --fondoBase: #1d1d1d;
+  --fondoPanel: #262626;
+  --fondoHeader: #2e2e2e;
+  --fondoInput: #1a1a1a;
+  --fondoHover: #3a3a3a;
+  --fondoActivo: #4d4d4d;
+
+  /* Bordes */
+  --borde: #404040;
+  --bordeSutil: #333333;
+
+  /* Texto */
+  --textoPrincipal: #e6e6e6;
+  --textoSecundario: #9a9a9a;
+  --textoDeshabilitado: #666666;
+
+  /* Acentos (paleta Blender) */
+  --acentoNaranja: #f5792a;
+  --acentoAzul: #3b82f6;
+  --verde: #7bc043;
+  --rojo: #e74c3c;
+  --amarillo: #f6d32d;
+
+  /* Métricas y tipografía */
+  --radioPanel: 4px;
+  --grosorBorde: 1px;
+  --fuentePrincipal: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --fuenteMono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  /* Editor */
+  --alturaBarraSuperior: 32px;
+  --textoChico: 12px;
+  --textoMini: 11px;
+  --sombraMenu: 0 4px 12px rgba(0, 0, 0, 0.45);
+}

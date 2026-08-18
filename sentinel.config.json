@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 2,
+  "mode": "enforce",
+  "project": {
+    "primaryBranch": "main"
+  },
+  "guard": {
+    "directCommands": {
+      "npmScripts": [
+        "lint",
+        "test",
+        "build",
+        "check"
+      ],
+      "npxTools": [
+        "eslint",
+        "tsc",
+        "typescript"
+      ],
+      "cargoSubcommands": [],
+      "tools": [
+        "git"
+      ]
+    }
+  },
+  "analyzers": {
+    "sentinel": {
+      "enabled": true,
+      "profile": "node",
+      "config": {
+        "includePatterns": [
+          "**/*.ts",
+          "**/*.tsx",
+          "**/*.js",
+          "**/*.jsx",
+          "**/*.css"
+        ],
+        "excludePatterns": [
+          "**/node_modules/**",
+          "**/dist/**",
+          "**/build/**",
+          "**/.git/**"
+        ],
+        "directoryExceptions": [
+          "Glory-Laminal"
+        ],
+        "portableBoundaries": {
+          "dom": [
+            "/src/platform/",
+            "/src/editor/",
+            "/src/app/",
+            "/src/input/",
+            "/src/render/gl/"
+          ]
+        }
+      }
+    }
+  }
+}

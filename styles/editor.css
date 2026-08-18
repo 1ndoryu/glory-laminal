@@ -1,0 +1,435 @@
+/* Chrome del editor tipo Blender. Clases en español camelCase; toda decisión visual se apoya en
+   los tokens de variables.css o en recetas compartidas (`.boton`, `.botonRelleno`, `.panel`). */
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--fondoBase);
+  color: var(--textoPrincipal);
+  font-family: var(--fuentePrincipal);
+  font-size: var(--textoChico);
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* --- Recetas compartidas (atómicas) --- */
+
+.boton {
+  border-radius: var(--radioPanel);
+  color: var(--textoSecundario);
+  background-color: transparent;
+}
+
+.boton:hover {
+  background-color: var(--fondoHover);
+  color: var(--textoPrincipal);
+}
+
+.botonRelleno {
+  background-color: var(--fondoHeader);
+  border: var(--grosorBorde) solid var(--borde);
+}
+
+/* --- Estructura general --- */
+
+.contenedorEditor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.barraSuperior {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--alturaBarraSuperior);
+  padding: 0 10px;
+  background-color: var(--fondoHeader);
+  border-bottom: var(--grosorBorde) solid var(--borde);
+  flex: 0 0 auto;
+}
+
+.marca {
+  font-weight: 600;
+  color: var(--acentoNaranja);
+  letter-spacing: 0.4px;
+}
+
+.pestanas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 16px;
+}
+
+.pestana {
+  padding: 4px 12px;
+  border-radius: var(--radioPanel);
+  color: var(--textoSecundario);
+}
+
+.pestana:hover {
+  background-color: var(--fondoHover);
+}
+
+.pestanaActiva {
+  background-color: var(--fondoActivo);
+  color: var(--textoPrincipal);
+}
+
+.contenidoEditor {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- Árbol de áreas (splits) --- */
+
+.area {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--fondoBase);
+}
+
+.division {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.panelDivision {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.asaDivision {
+  background-color: var(--borde);
+}
+
+.asaDivision:hover {
+  background-color: var(--acentoNaranja);
+}
+
+.divisionFila {
+  grid-auto-flow: column;
+}
+
+.divisionColumna {
+  grid-auto-flow: row;
+}
+
+.divisionFila .asaDivision {
+  cursor: col-resize;
+}
+
+.divisionColumna .asaDivision {
+  cursor: row-resize;
+}
+
+/* --- Regiones del 3D Viewport --- */
+
+.region {
+  min-width: 0;
+  min-height: 0;
+}
+
+.cabeceraViewport {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  background-color: var(--fondoHeader);
+  border-bottom: var(--grosorBorde) solid var(--borde);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.nombreEditor {
+  margin-right: 8px;
+  color: var(--textoSecundario);
+  text-transform: uppercase;
+  font-size: var(--textoMini);
+  letter-spacing: 0.5px;
+}
+
+.separador {
+  flex: 1 1 auto;
+}
+
+.botonCabecera {
+  padding: 3px 9px;
+}
+
+.ventanaViewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.lienzoViewport {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.barraLateral {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--fondoPanel);
+  overflow: hidden;
+  position: relative;
+}
+
+.cabeceraBarra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: var(--grosorBorde) solid var(--bordeSutil);
+  flex: 0 0 auto;
+}
+
+.tituloBarra {
+  color: var(--textoSecundario);
+  text-transform: uppercase;
+  font-size: var(--textoMini);
+  letter-spacing: 0.4px;
+}
+
+.botonColapsar {
+  padding: 0 4px;
+}
+
+.asaRedimension {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  width: 6px;
+  cursor: col-resize;
+}
+
+.asaRedimensionIzquierda {
+  right: auto;
+  left: -3px;
+}
+
+.asaRedimension:hover {
+  background-color: var(--acentoNaranja);
+}
+
+.pieViewport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  background-color: var(--fondoHeader);
+  border-top: var(--grosorBorde) solid var(--borde);
+  font-size: var(--textoMini);
+  color: var(--textoSecundario);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.datoViewport {
+  font-variant-numeric: tabular-nums;
+}
+
+.ayudaViewport {
+  color: var(--textoDeshabilitado);
+}
+
+/* --- Paneles y campos --- */
+
+.panel {
+  border-bottom: var(--grosorBorde) solid var(--bordeSutil);
+  flex: 0 0 auto;
+}
+
+.cabeceraPanel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.cuerpoPanel {
+  padding: 8px;
+  border-top: var(--grosorBorde) solid var(--bordeSutil);
+}
+
+.camposPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filaCampo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.etiquetaCampo {
+  color: var(--textoSecundario);
+}
+
+.selectorCampo,
+.numeroCampo {
+  background-color: var(--fondoInput);
+  color: var(--textoPrincipal);
+  border: var(--grosorBorde) solid var(--borde);
+  border-radius: var(--radioPanel);
+  padding: 3px 6px;
+}
+
+.selectorCampo {
+  flex: 1 1 auto;
+  max-width: 140px;
+}
+
+.numeroCampo {
+  width: 100px;
+}
+
+.casillaCampo {
+  accent-color: var(--acentoAzul);
+}
+
+.rangoCampo {
+  flex: 1 1 auto;
+  accent-color: var(--acentoAzul);
+}
+
+.valorCampo {
+  align-self: flex-end;
+  color: var(--textoSecundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.lecturaCampo {
+  color: var(--textoSecundario);
+  font-family: var(--fuenteMono);
+  font-size: var(--textoMini);
+  line-height: 1.4;
+}
+
+.botonPanel {
+  padding: 5px 10px;
+  color: var(--textoPrincipal);
+}
+
+/* --- Herramientas --- */
+
+.listaHerramientas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.botonHerramienta {
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.botonHerramientaActiva {
+  background-color: var(--fondoActivo);
+  color: var(--textoPrincipal);
+  outline: var(--grosorBorde) solid var(--acentoAzul);
+}
+
+/* --- Menús --- */
+
+.menu {
+  position: relative;
+}
+
+.disparadorMenu {
+  padding: 3px 9px;
+}
+
+.desplegableMenu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 100;
+  min-width: 180px;
+  padding: 4px;
+  background-color: var(--fondoPanel);
+  border: var(--grosorBorde) solid var(--borde);
+  border-radius: var(--radioPanel);
+  box-shadow: var(--sombraMenu);
+}
+
+.elementoMenu {
+  display: block;
+  width: 100%;
+  padding: 5px 8px;
+  text-align: left;
+  color: var(--textoPrincipal);
+}
+
+.elementoMenu:disabled {
+  color: var(--textoDeshabilitado);
+  cursor: default;
+}
+
+/* --- Outliner --- */
+
+.cabeceraOutliner {
+  background-color: var(--fondoHeader);
+  border-bottom: var(--grosorBorde) solid var(--borde);
+  padding: 6px 8px;
+  color: var(--textoSecundario);
+  text-transform: uppercase;
+  font-size: var(--textoMini);
+  letter-spacing: 0.5px;
+}
+
+.ventanaOutliner {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.listaOutliner {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.elementoOutliner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  color: var(--textoSecundario);
+}
+
+.elementoOutliner:hover {
+  background-color: var(--fondoHover);
+  color: var(--textoPrincipal);
+}
+
+.iconoOutliner {
+  width: 16px;
+  text-align: center;
+}
