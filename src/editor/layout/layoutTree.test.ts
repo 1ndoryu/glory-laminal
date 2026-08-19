@@ -3,6 +3,7 @@ import {
   collectLeaves,
   createLeaf,
   joinArea,
+  setEditorType,
   setRegionSize,
   setRegionVisible,
   setSplitRatio,
@@ -79,6 +80,15 @@ describe('layoutTree', () => {
     const updated = setRegionVisible(root, leaf.id, 'TOOLS', false);
     const region = collectLeaves(updated)[0]!.regions.find((r) => r.type === 'TOOLS')!;
     expect(region.visible).toBe(false);
+  });
+
+  it('setEditorType cambia el editor y regenera sus regiones', () => {
+    const root = makeScreen();
+    const leaf = collectLeaves(root)[0]!;
+    const updated = setEditorType(root, leaf.id, 'outliner', ['HEADER', 'WINDOW']);
+    const changed = collectLeaves(updated)[0]!;
+    expect(changed.editor).toBe('outliner');
+    expect(changed.regions.map((r) => r.type)).toEqual(['HEADER', 'WINDOW']);
   });
 
   it('setRegionSize actualiza y clampa el tamaño', () => {

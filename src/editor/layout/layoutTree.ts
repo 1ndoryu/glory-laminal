@@ -92,6 +92,36 @@ export function splitArea(
   };
 }
 
+/* Cambia el tipo de editor de la hoja `areaId` y regenera sus regiones con los defaults del
+   nuevo editor (equivale a cambiar de "space" en Blender). */
+export function setEditorType(
+  root: AreaNode,
+  areaId: string,
+  editorId: string,
+  regionTypes: RegionType[],
+): AreaNode {
+  if (root.kind === 'leaf') {
+    if (root.id !== areaId) {
+      return root;
+    }
+    return {
+      ...root,
+      editor: editorId,
+      regions: regionTypes.map((type) => ({
+        id: nextId('region'),
+        type,
+        visible: true,
+        size: defaultRegionSize(type),
+      })),
+    };
+  }
+  return {
+    ...root,
+    first: setEditorType(root.first, areaId, editorId, regionTypes),
+    second: setEditorType(root.second, areaId, editorId, regionTypes),
+  };
+}
+
 /* Elimina el split padre de la hoja `areaId` y lo reemplaza por su hermano. */
 export function joinArea(root: AreaNode, areaId: string): AreaNode {
   if (root.kind === 'leaf') {

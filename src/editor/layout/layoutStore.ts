@@ -3,6 +3,7 @@ import { getEditorDefinition } from '../editors/registry';
 import {
   createLeaf,
   joinArea as joinAreaTree,
+  setEditorType as setEditorTypeTree,
   setRegionSize as setRegionSizeTree,
   setRegionVisible as setRegionVisibleTree,
   setSplitRatio as setSplitRatioTree,
@@ -24,6 +25,7 @@ export interface LayoutState {
   root: AreaNode;
   splitArea: (areaId: string, orientation: SplitOrientation, editorId: string) => void;
   joinArea: (areaId: string) => void;
+  setEditorType: (areaId: string, editorId: string) => void;
   setSplitRatio: (splitId: string, ratio: number) => void;
   setRegionVisible: (areaId: string, region: RegionType, visible: boolean) => void;
   setRegionSize: (areaId: string, region: RegionType, size: number) => void;
@@ -38,6 +40,11 @@ export const layoutStore = createStore<LayoutState>()((set) => ({
       return { root: splitAreaTree(state.root, areaId, orientation, newLeaf) };
     }),
   joinArea: (areaId) => set((state) => ({ root: joinAreaTree(state.root, areaId) })),
+  setEditorType: (areaId, editorId) =>
+    set((state) => {
+      const definition = getEditorDefinition(editorId);
+      return { root: setEditorTypeTree(state.root, areaId, editorId, definition.regions) };
+    }),
   setSplitRatio: (splitId, ratio) =>
     set((state) => ({ root: setSplitRatioTree(state.root, splitId, ratio) })),
   setRegionVisible: (areaId, region, visible) =>

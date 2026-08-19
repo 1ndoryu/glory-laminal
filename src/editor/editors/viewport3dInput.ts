@@ -21,10 +21,11 @@ function toNdc(canvas: HTMLCanvasElement, clientX: number, clientY: number): [nu
 }
 
 /* Control de ratón del viewport: MMB órbita, Shift+MMB pan, Ctrl+MMB y rueda zoom (hacia el
-   cursor, como Blender). */
+   cursor, como Blender). `onStatus` recibe un texto breve para el pie, vacío al terminar. */
 export function attachViewportInput(
   canvas: HTMLCanvasElement,
   getCamera: () => OrbitCamera | null,
+  onStatus: (text: string) => void,
 ): void {
   let interaction: Interaction | null = null;
   let lastX = 0;
@@ -36,6 +37,7 @@ export function attachViewportInput(
     }
     event.preventDefault();
     interaction = event.shiftKey ? 'pan' : event.ctrlKey ? 'zoom' : 'orbit';
+    onStatus(interaction === 'pan' ? 'Pan' : interaction === 'zoom' ? 'Dolly' : 'Órbita');
     lastX = event.clientX;
     lastY = event.clientY;
     canvas.setPointerCapture(event.pointerId);
@@ -67,6 +69,7 @@ export function attachViewportInput(
   const endInteraction = (event: PointerEvent): void => {
     if (event.button === 1) {
       interaction = null;
+      onStatus('');
     }
   };
   canvas.addEventListener('pointerup', endInteraction);

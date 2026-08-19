@@ -21,7 +21,7 @@ import type { RegionState } from '../layout/types';
 import { editorStore } from '../store';
 import type { EditorInstance } from './types';
 import { buildViewportChrome, type ViewportChrome } from './viewport3dChrome';
-import { buildNavigationGizmo } from './viewport3dGizmo';
+import { buildNavigationGizmo, type NavigationGizmo } from './viewport3dGizmo';
 import { attachViewportInput, registerViewportKeyboard } from './viewport3dInput';
 
 const LIGHT_DIRECTION = new Vec3(0.45, 0.55, 0.85);
@@ -42,6 +42,7 @@ export class Viewport3DEditor implements EditorInstance {
   private gridProgram: ShaderProgram | null = null;
   private mesh: Mesh | null = null;
   private grid: GridLines | null = null;
+  private gizmo: NavigationGizmo | null = null;
   private camera: OrbitCamera | null = null;
   private loop: RenderLoop | null = null;
   private unsubscribeStore: (() => void) | null = null;
@@ -81,9 +82,14 @@ export class Viewport3DEditor implements EditorInstance {
     this.buildTerrain();
     this.camera.frameSelected(this.terrainRadius);
 
-    elements.window.appendChild(buildNavigationGizmo(() => this.camera));
+    this.gizmo = buildNavigationGizmo(() => this.camera);
+    elements.window.appendChild(this.gizmo.element);
 
-    attachViewportInput(elements.canvas, () => this.camera);
+    attachViewportInput(elements.canvas, () => this.camera, (text) => {
+      if (this.chrome !== null) {
+        this.chrome.readouts.status.textContent = text;
+      }
+    });
     registerViewportKeyboard(host, {
       areaId: this.areaId,
       getCamera: () => this.camera,
@@ -143,6 +149,7 @@ export class Viewport3DEditor implements EditorInstance {
     this.camera.orthographic = state.orthographic;
     this.camera.orbitMethod = state.orbitMethod;
     this.camera.update(deltaSeconds);
+    this.gizmo?.sync(this.camera);
 
     this.renderer.resizeToDisplaySize();
     /* Fondo transparente: el degradado del viewport lo pinta el CSS (`.ventanaViewport`). */
@@ -242,11 +249,8 @@ export class Viewport3DEditor implements EditorInstance {
     this.frameCount = 0;
     this.lastStatsAt = now;
 
-    const { fps: fpsEl, camera: cameraEl, cameraInfo } = this.chrome.readouts;
+    const { fps: fpsEl, cameraInfo } = this.chrome.readouts;
     fpsEl.textContent = `${fps.toFixed(0)} FPS`;
-
-    const eye = this.camera.eye();
-    cameraEl.textContent = `Cam X ${eye.x.toFixed(1)} · Y ${eye.y.toFixed(1)} · Z ${eye.z.toFixed(1)} · Dist ${this.camera.distance.toFixed(1)}`;
 
     const azimuthDegrees = ((this.camera.azimuth * 180) / Math.PI).toFixed(0);
     const elevationDegrees = ((this.camera.elevation * 180) / Math.PI).toFixed(0);

@@ -24,6 +24,10 @@ export function getEditorDefinition(id: string): EditorDefinition {
   return definition;
 }
 
+export function listEditorDefinitions(): EditorDefinition[] {
+  return [...definitions.values()];
+}
+
 export function registerBuiltinEditors(): void {
   registerEditor({
     id: 'viewport3d',

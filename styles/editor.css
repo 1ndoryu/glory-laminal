@@ -31,46 +31,13 @@ button {
 
 /* --- Estructura general --- */
 
-.contenedorEditor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.barraSuperior {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: var(--alturaTopbar);
-  padding: 0 6px;
-  background-color: var(--fondoTopbar);
-  border-bottom: var(--grosorBorde) solid var(--borde);
-  flex: 0 0 auto;
-  font-size: var(--textoChico);
-}
-
 .contenidoEditor {
-  flex: 1 1 auto;
+  height: 100%;
   position: relative;
-  min-height: 0;
   overflow: hidden;
   padding: 4px;
   background-color: var(--editorBorde);
-}
-
-/* --- Topbar --- */
-
-.marca {
-  font-weight: 600;
-  color: var(--textoPrincipal);
-  font-size: var(--textoChico);
-  padding: 0 2px;
-}
-
-.version {
-  color: var(--textoSecundario);
-  font-size: var(--textoChico);
-  padding: 0 4px;
+  box-sizing: border-box;
 }
 
 /* --- Árbol de áreas (splits) --- */
@@ -136,8 +103,8 @@ button {
   padding: 0 4px;
   background-color: var(--fondoHeader);
   border-bottom: var(--grosorBorde) solid var(--borde);
-  overflow: hidden;
   white-space: nowrap;
+  z-index: 20;
 }
 
 .selectorEditor {
@@ -199,6 +166,7 @@ button {
 .pieViewport {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 0 8px;
   background-color: var(--fondoStatusbar);
@@ -209,29 +177,14 @@ button {
   white-space: nowrap;
 }
 
-.grupoPie {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+.estadoViewport {
+  color: var(--textoStatusbar);
   overflow: hidden;
-}
-
-.grupoPieDerecha {
-  gap: 8px;
-  flex: 0 0 auto;
+  text-overflow: ellipsis;
 }
 
 .datoViewport {
   font-variant-numeric: tabular-nums;
-}
-
-.ayudaViewport {
-  color: var(--textoStatusbar);
-}
-
-.punto {
-  color: var(--textoDeshabilitado);
 }
 
 /* --- Outliner --- */

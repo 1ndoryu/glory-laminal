@@ -18,6 +18,7 @@ interface SplitHost {
 export class LayoutView {
   private readonly leafHosts = new Map<string, HTMLElement>();
   private readonly editors = new Map<string, EditorInstance>();
+  private readonly mountedEditor = new Map<string, string>();
   private readonly splitHosts = new Map<string, SplitHost>();
   private readonly unsubscribe: () => void;
 
@@ -47,12 +48,20 @@ export class LayoutView {
       host = createElement('div', 'area');
       host.dataset.areaId = area.id;
       this.leafHosts.set(area.id, host);
-      const editor = createEditor(area.editor);
-      this.editors.set(area.id, editor);
-      editor.mount(host);
     }
     if (host.parentElement !== container) {
       container.appendChild(host);
+    }
+    /* Si cambió el tipo de editor (selector de editor), desmonta el anterior y monta el nuevo. */
+    if (this.mountedEditor.get(area.id) !== area.editor) {
+      this.editors.get(area.id)?.dispose();
+      host.replaceChildren();
+      /* Limpia los estilos inline que dejó el editor anterior (grid/flex de regiones). */
+      host.removeAttribute('style');
+      const editor = createEditor(area.editor);
+      this.editors.set(area.id, editor);
+      this.mountedEditor.set(area.id, area.editor);
+      editor.mount(host);
     }
     this.editors.get(area.id)?.updateRegions(area.regions);
     return host;

@@ -1,5 +1,6 @@
 import { createElement } from '../../platform/dom';
 import type { RegionState } from '../layout/types';
+import { buildEditorSelector } from '../widgets/editorSelector';
 import { lucideIcon } from '../widgets/icons';
 import type { EditorInstance } from './types';
 
@@ -17,7 +18,8 @@ const SCENE_ITEMS: SceneItem[] = [
 ];
 
 /* Editor de prueba para demostrar el registro de tipos: un Outliner estático equivalente al de
-   Blender. No tiene WebGL; sólo HEADER + WINDOW. */
+   Blender. No tiene WebGL; sólo HEADER + WINDOW. Su cabecera incluye el selector de editor para
+   poder volver al 3D Viewport. */
 export class OutlinerEditor implements EditorInstance {
   private host: HTMLElement | null = null;
   private header: HTMLElement | null = null;
@@ -28,7 +30,7 @@ export class OutlinerEditor implements EditorInstance {
     host.style.flexDirection = 'column';
 
     const header = createElement('div', 'region cabeceraOutliner');
-    header.append(lucideIcon('list-tree', 14), createElement('span', '', 'Outliner'));
+    header.append(buildEditorSelector(host.dataset.areaId ?? 'outliner', 'outliner'));
 
     const window = createElement('div', 'region ventanaOutliner');
     const list = createElement('ul', 'listaOutliner');

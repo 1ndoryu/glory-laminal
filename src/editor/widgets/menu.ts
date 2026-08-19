@@ -19,12 +19,11 @@ function closeAllMenus(): void {
   openDropdowns.clear();
 }
 
-/* Menú desplegable de los headers, equivalente a los menús de Blender. Cerrar uno cierra el
-   resto; un clic fuera cierra todos (listener global instalado una única vez). */
-export function createMenu(label: string, items: MenuItem[]): HTMLElement {
+/* Menú desplegable genérico: el trigger lo aporta el consumidor (botón de menú de header, selector
+   de editor, etc.). Cerrar uno cierra el resto; un clic fuera cierra todos (listener global instalado
+   una única vez). */
+export function createDropdown(trigger: HTMLButtonElement, items: MenuItem[]): HTMLElement {
   const root = createElement('div', 'menu');
-  const trigger = createElement('button', 'botonMenu', label);
-  trigger.type = 'button';
   const dropdown = createElement('div', 'desplegableMenu');
   dropdown.hidden = true;
 
@@ -59,6 +58,7 @@ export function createMenu(label: string, items: MenuItem[]): HTMLElement {
     dropdown.appendChild(entry);
   }
 
+  trigger.type = 'button';
   trigger.addEventListener('click', (event) => {
     event.stopPropagation();
     if (dropdown.hidden) {
@@ -71,6 +71,13 @@ export function createMenu(label: string, items: MenuItem[]): HTMLElement {
 
   root.append(trigger, dropdown);
   return root;
+}
+
+/* Menú desplegable de los headers con trigger estándar (botón de texto). */
+export function createMenu(label: string, items: MenuItem[]): HTMLElement {
+  const trigger = createElement('button', 'botonMenu', label);
+  trigger.type = 'button';
+  return createDropdown(trigger, items);
 }
 
 if (typeof document !== 'undefined') {

@@ -296,3 +296,22 @@
   margin: 3px 4px;
   background-color: var(--borde);
 }
+
+/* --- Tooltip global --- */
+
+.tooltipGlobal {
+  position: fixed;
+  z-index: 2000;
+  max-width: 320px;
+  padding: 4px 8px;
+  background-color: var(--botonInternoMenu);
+  color: var(--textoPrincipal);
+  border: var(--grosorBorde) solid var(--borde);
+  border-radius: var(--radio);
+  font-size: var(--textoChico);
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: var(--sombraMenu);
+  white-space: normal;
+  overflow-wrap: break-word;
+}

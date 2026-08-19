@@ -1,15 +1,16 @@
 import { createElement } from '../../platform/dom';
 import { layoutStore } from '../layout/layoutStore';
 import { editorStore, type EditorState } from '../store';
+import { buildEditorSelector } from '../widgets/editorSelector';
 import { lucideIcon } from '../widgets/icons';
 import { createMenu } from '../widgets/menu';
 import { buildViewportSidebar, type ViewportSidebar } from './viewport3dSidebar';
 
 export interface ViewportReadouts {
   fps: HTMLElement;
-  camera: HTMLElement;
   cameraInfo: HTMLElement;
   stats: HTMLElement;
+  status: HTMLElement;
 }
 
 export interface ViewportChrome {
@@ -40,7 +41,7 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
   let orbitButton: HTMLElement | null = null;
   let orthoButton: HTMLElement | null = null;
   let fpsEl: HTMLElement | null = null;
-  let cameraEl: HTMLElement | null = null;
+  let statusEl: HTMLElement | null = null;
 
   const sidebar: ViewportSidebar = buildViewportSidebar({ areaId, onFrameSelected });
   const header = buildHeader();
@@ -75,9 +76,9 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
     elements: { header, ui: sidebar.element, window, footer, canvas },
     readouts: {
       fps: fpsEl!,
-      camera: cameraEl!,
       cameraInfo: sidebar.readouts.cameraInfo,
       stats: sidebar.readouts.stats,
+      status: statusEl!,
     },
     sync,
   };
@@ -85,9 +86,7 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
   function buildHeader(): HTMLElement {
     const element = createElement('header', 'region cabeceraViewport');
 
-    const editorLabel = createElement('span', 'selectorEditor');
-    editorLabel.append(lucideIcon('box', 14), createElement('span', '', '3D Viewport'));
-    element.appendChild(editorLabel);
+    element.appendChild(buildEditorSelector(areaId, 'viewport3d'));
 
     element.appendChild(
       createMenu('View', [
@@ -139,31 +138,9 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
 
   function buildFooter(): HTMLElement {
     const footer = createElement('footer', 'region pieViewport');
-
-    const left = createElement('div', 'grupoPie');
-    left.append(
-      createElement('span', 'datoViewport', 'Object Mode'),
-      createElement(
-        'span',
-        'ayudaViewport',
-        'MMB órbita · Shift+MMB pan · rueda/Ctrl+MMB zoom · numpad 1/3/7/9 vistas · 5 orto · . frame · N sidebar',
-      ),
-    );
-    footer.appendChild(left);
-
-    footer.appendChild(createElement('span', 'separador'));
-
-    const right = createElement('div', 'grupoPie grupoPieDerecha');
+    statusEl = createElement('span', 'estadoViewport');
     fpsEl = createElement('span', 'datoViewport');
-    cameraEl = createElement('span', 'datoViewport');
-    right.append(
-      fpsEl,
-      createElement('span', 'datoViewport punto', '·'),
-      cameraEl,
-      createElement('span', 'version', '0.1.0'),
-    );
-    footer.appendChild(right);
-
+    footer.append(statusEl, fpsEl);
     return footer;
   }
 }
