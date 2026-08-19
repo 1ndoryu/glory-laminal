@@ -28,7 +28,7 @@ export function registerBuiltinEditors(): void {
   registerEditor({
     id: 'viewport3d',
     name: '3D Viewport',
-    regions: ['HEADER', 'TOOLS', 'UI', 'FOOTER', 'WINDOW'],
+    regions: ['HEADER', 'UI', 'FOOTER', 'WINDOW'],
   });
   registerEditor({
     id: 'outliner',

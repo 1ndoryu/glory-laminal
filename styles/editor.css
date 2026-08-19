@@ -60,25 +60,11 @@ button {
 
 /* --- Topbar --- */
 
-.pestanas {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.menusTopbar {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  margin-left: 8px;
-  padding-left: 8px;
-  border-left: var(--grosorBorde) solid var(--borde);
-}
-
-.controlesTopbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.marca {
+  font-weight: 600;
+  color: var(--textoPrincipal);
+  font-size: var(--textoChico);
+  padding: 0 2px;
 }
 
 .version {
@@ -201,46 +187,6 @@ button {
   border-radius: var(--radioArea);
   overflow: hidden;
   position: relative;
-}
-
-.cabeceraBarra {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 24px;
-  padding: 0 4px;
-  border-bottom: var(--grosorBorde) solid var(--borde);
-  flex: 0 0 auto;
-  background-color: var(--fondoPanelCabecera);
-}
-
-.tituloBarra {
-  color: var(--textoSecundario);
-  text-transform: uppercase;
-  font-size: var(--textoMini);
-  letter-spacing: 0.4px;
-}
-
-.listaHerramientas {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px 6px 0;
-  overflow-y: auto;
-  flex: 1 1 auto;
-}
-
-.pestanasSidebar {
-  display: flex;
-  align-items: stretch;
-  background-color: var(--fondoPanelCabecera);
-  border-bottom: var(--grosorBorde) solid var(--borde);
-  flex: 0 0 auto;
-}
-
-.pestanaCuerpo {
-  display: flex;
-  flex-direction: column;
 }
 
 .cuerpoSidebar {

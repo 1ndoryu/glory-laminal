@@ -14,7 +14,7 @@ const DEFAULT_EDITOR = 'viewport3d';
 
 /* Regiones del editor inicial. Se declaran aquí (no desde el registro) porque el store se crea
    durante la evaluación de módulos, antes de que `boot` registre los editores. */
-const DEFAULT_REGIONS: RegionType[] = ['HEADER', 'TOOLS', 'UI', 'FOOTER', 'WINDOW'];
+const DEFAULT_REGIONS: RegionType[] = ['HEADER', 'UI', 'FOOTER', 'WINDOW'];
 
 function initialScreen(): AreaNode {
   return createLeaf(DEFAULT_EDITOR, DEFAULT_REGIONS);

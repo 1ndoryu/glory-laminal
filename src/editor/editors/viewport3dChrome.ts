@@ -1,7 +1,5 @@
-import { createElement, onDrag } from '../../platform/dom';
-import { defaultRegionSize, findLeaf } from '../layout/layoutTree';
+import { createElement } from '../../platform/dom';
 import { layoutStore } from '../layout/layoutStore';
-import type { RegionType } from '../layout/types';
 import { editorStore, type EditorState } from '../store';
 import { lucideIcon } from '../widgets/icons';
 import { createMenu } from '../widgets/menu';
@@ -17,7 +15,6 @@ export interface ViewportReadouts {
 export interface ViewportChrome {
   elements: {
     header: HTMLElement;
-    tools: HTMLElement;
     ui: HTMLElement;
     window: HTMLElement;
     footer: HTMLElement;
@@ -32,27 +29,14 @@ export interface ViewportChromeOptions {
   onFrameSelected: () => void;
 }
 
-type ToolId = 'select' | 'cursor' | 'move' | 'rotate' | 'scale' | 'annotate' | 'measure';
-
-const TOOLS: ReadonlyArray<{ id: ToolId; icon: string; name: string }> = [
-  { id: 'select', icon: 'mouse-pointer', name: 'Select Box' },
-  { id: 'cursor', icon: 'crosshair', name: '3D Cursor' },
-  { id: 'move', icon: 'move', name: 'Move' },
-  { id: 'rotate', icon: 'rotate-3d', name: 'Rotate' },
-  { id: 'scale', icon: 'scaling', name: 'Scale' },
-  { id: 'annotate', icon: 'pen-line', name: 'Annotate' },
-  { id: 'measure', icon: 'ruler', name: 'Measure' },
-];
-
-/* Construye el chrome DOM del 3D Viewport (HEADER/TOOLS/FOOTER + canvas) y delega el sidebar en
-   viewport3dSidebar. Mantiene sus controles en privado y expone `sync` para reflejar el estado
-   global. El motor (WebGL/cámara/terreno) vive en Viewport3DEditor, no aquí. */
+/* Construye el chrome DOM del 3D Viewport (HEADER/FOOTER + canvas) y delega el sidebar en
+   viewport3dSidebar. Solo incluye controles con comportamiento real; el resto se reintroducirá
+   cuando exista. El motor (WebGL/cámara/terreno) vive en Viewport3DEditor, no aquí. */
 export function buildViewportChrome(options: ViewportChromeOptions): ViewportChrome {
   const { areaId, onFrameSelected } = options;
 
   let wireframeIcon: HTMLElement | null = null;
   let solidIcon: HTMLElement | null = null;
-  let renderedIcon: HTMLElement | null = null;
   let orbitButton: HTMLElement | null = null;
   let orthoButton: HTMLElement | null = null;
   let fpsEl: HTMLElement | null = null;
@@ -60,27 +44,20 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
 
   const sidebar: ViewportSidebar = buildViewportSidebar({ areaId, onFrameSelected });
   const header = buildHeader();
-  const tools = buildTools(sidebar.setActiveTool);
   const window = createElement('div', 'region ventanaViewport');
   const canvas = document.createElement('canvas');
   canvas.className = 'lienzoViewport';
   window.appendChild(canvas);
   const footer = buildFooter();
 
-  for (const [region, name] of [
-    [header, 'header'],
-    [tools, 'tools'],
-    [window, 'window'],
-    [sidebar.element, 'ui'],
-    [footer, 'footer'],
-  ] as const) {
-    region.style.gridArea = name;
-  }
+  header.style.gridArea = 'header';
+  window.style.gridArea = 'window';
+  sidebar.element.style.gridArea = 'ui';
+  footer.style.gridArea = 'footer';
 
   const sync = (state: EditorState): void => {
     wireframeIcon?.classList.toggle('activo', state.wireframe);
     solidIcon?.classList.toggle('activo', !state.wireframe);
-    renderedIcon?.classList.toggle('activo', false);
     orbitButton?.classList.toggle('activo', state.orbitMethod === 'trackball');
     orbitButton?.setAttribute(
       'title',
@@ -95,7 +72,7 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
   };
 
   return {
-    elements: { header, tools, ui: sidebar.element, window, footer, canvas },
+    elements: { header, ui: sidebar.element, window, footer, canvas },
     readouts: {
       fps: fpsEl!,
       camera: cameraEl!,
@@ -108,13 +85,10 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
   function buildHeader(): HTMLElement {
     const element = createElement('header', 'region cabeceraViewport');
 
-    const editorSelector = createElement('button', 'botonMenu selectorEditor');
-    editorSelector.type = 'button';
-    editorSelector.title = 'Tipo de editor';
-    editorSelector.append(lucideIcon('box', 14), createElement('span', '', '3D Viewport'));
-    element.appendChild(editorSelector);
+    const editorLabel = createElement('span', 'selectorEditor');
+    editorLabel.append(lucideIcon('box', 14), createElement('span', '', '3D Viewport'));
+    element.appendChild(editorLabel);
 
-    element.appendChild(createMenu('Object Mode', [{ label: 'Próximamente', disabled: true }]));
     element.appendChild(
       createMenu('View', [
         {
@@ -130,24 +104,14 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
         { label: 'Join Area', icon: '◫', onClick: () => layoutStore.getState().joinArea(areaId) },
       ]),
     );
-    for (const name of ['Select', 'Add', 'Object']) {
-      element.appendChild(createMenu(name, [{ label: 'Próximamente', disabled: true }]));
-    }
 
     element.appendChild(createElement('span', 'separador'));
 
     const shadingGroup = createElement('div', 'grupoIconos');
     wireframeIcon = makeIconToggle('box', 'Wireframe', () => editorStore.getState().setWireframe(true));
     solidIcon = makeIconToggle('circle', 'Sólido', () => editorStore.getState().setWireframe(false));
-    renderedIcon = makeIconToggle('sun', 'Renderizado (próximamente)', () =>
-      editorStore.getState().setWireframe(false),
-    );
-    shadingGroup.append(wireframeIcon, solidIcon, renderedIcon);
+    shadingGroup.append(wireframeIcon, solidIcon);
     element.appendChild(shadingGroup);
-
-    const overlay = makeIconToggle('eye', 'Overlays', () => overlay.classList.toggle('activo'));
-    overlay.classList.add('activo');
-    element.appendChild(overlay);
 
     element.appendChild(createElement('span', 'separadorChico'));
 
@@ -173,42 +137,6 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
     return button;
   }
 
-  function buildTools(onToolChange: (name: string) => void): HTMLElement {
-    const tools = createElement('aside', 'region barraLateral');
-
-    const header = createElement('div', 'cabeceraBarra');
-    const collapse = createElement('button', 'boton botonIcono botonColapsar');
-    collapse.type = 'button';
-    collapse.title = 'Ocultar herramientas (T)';
-    collapse.append(lucideIcon('chevron-left', 14));
-    collapse.addEventListener('click', () =>
-      layoutStore.getState().setRegionVisible(areaId, 'TOOLS', false),
-    );
-    header.appendChild(collapse);
-    tools.appendChild(header);
-
-    const list = createElement('div', 'listaHerramientas');
-    for (const tool of TOOLS) {
-      const button = createElement('button', 'boton botonHerramienta');
-      button.type = 'button';
-      button.title = tool.name;
-      button.append(lucideIcon(tool.icon, 18));
-      button.classList.toggle('botonHerramientaActiva', tool.id === 'move');
-      button.addEventListener('click', () => {
-        for (const child of list.children) {
-          child.classList.remove('botonHerramientaActiva');
-        }
-        button.classList.add('botonHerramientaActiva');
-        onToolChange(tool.name);
-      });
-      list.appendChild(button);
-    }
-    tools.appendChild(list);
-
-    attachSidebarResize(tools, 'TOOLS');
-    return tools;
-  }
-
   function buildFooter(): HTMLElement {
     const footer = createElement('footer', 'region pieViewport');
 
@@ -218,7 +146,7 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
       createElement(
         'span',
         'ayudaViewport',
-        'MMB órbita · Shift+MMB pan · rueda/Ctrl+MMB zoom · numpad 1/3/7/9 vistas · 5 orto · . frame',
+        'MMB órbita · Shift+MMB pan · rueda/Ctrl+MMB zoom · numpad 1/3/7/9 vistas · 5 orto · . frame · N sidebar',
       ),
     );
     footer.appendChild(left);
@@ -232,21 +160,10 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
       fpsEl,
       createElement('span', 'datoViewport punto', '·'),
       cameraEl,
-      createElement('span', 'version', 'Glory Laminal 0.1.0'),
+      createElement('span', 'version', '0.1.0'),
     );
     footer.appendChild(right);
 
     return footer;
-  }
-
-  function attachSidebarResize(sidebar: HTMLElement, region: RegionType): void {
-    const handle = createElement('div', 'asaRedimension');
-    sidebar.appendChild(handle);
-    onDrag(handle, (dx) => {
-      const leaf = findLeaf(layoutStore.getState().root, areaId);
-      const current =
-        leaf?.regions.find((item) => item.type === region)?.size ?? defaultRegionSize(region);
-      layoutStore.getState().setRegionSize(areaId, region, current + dx);
-    });
   }
 }

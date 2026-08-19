@@ -59,7 +59,7 @@ export class Viewport3DEditor implements EditorInstance {
       onFrameSelected: () => this.camera?.smoothFrameSelected(this.terrainRadius),
     });
     const elements = this.chrome.elements;
-    host.append(elements.header, elements.tools, elements.window, elements.ui, elements.footer);
+    host.append(elements.header, elements.window, elements.ui, elements.footer);
 
     this.renderer = WebGL2Renderer.create(elements.canvas);
     const gl = this.renderer.context;
@@ -106,23 +106,20 @@ export class Viewport3DEditor implements EditorInstance {
     if (this.host === null || this.chrome === null) {
       return;
     }
-    const { header, tools, ui, footer } = this.chrome.elements;
+    const { header, ui, footer } = this.chrome.elements;
     const findRegion = (type: RegionState['type']): RegionState | undefined =>
       regions.find((region) => region.type === type);
     const headerRegion = findRegion('HEADER');
     const footerRegion = findRegion('FOOTER');
-    const toolsRegion = findRegion('TOOLS');
     const uiRegion = findRegion('UI');
 
     this.host.style.display = 'grid';
-    this.host.style.gridTemplateAreas =
-      '"header header header" "tools window ui" "footer footer footer"';
-    this.host.style.gridTemplateColumns = `${toolsRegion?.visible ? toolsRegion.size : 0}px 1fr ${uiRegion?.visible ? uiRegion.size : 0}px`;
+    this.host.style.gridTemplateAreas = '"header header" "window ui" "footer footer"';
+    this.host.style.gridTemplateColumns = `1fr ${uiRegion?.visible ? uiRegion.size : 0}px`;
     this.host.style.gridTemplateRows = `${headerRegion?.visible ? headerRegion.size : 0}px 1fr ${footerRegion?.visible ? footerRegion.size : 0}px`;
 
     header.style.display = headerRegion?.visible ? '' : 'none';
     footer.style.display = footerRegion?.visible ? '' : 'none';
-    tools.style.display = toolsRegion?.visible ? '' : 'none';
     ui.style.display = uiRegion?.visible ? '' : 'none';
   }
 

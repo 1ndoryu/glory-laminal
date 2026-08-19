@@ -8,7 +8,6 @@ import { createPanel } from '../widgets/panel';
 export interface ViewportSidebar {
   element: HTMLElement;
   readouts: { cameraInfo: HTMLElement; stats: HTMLElement };
-  setActiveTool: (name: string) => void;
   sync: (state: EditorState) => void;
 }
 
@@ -17,15 +16,11 @@ export interface ViewportSidebarOptions {
   onFrameSelected: () => void;
 }
 
-type SidebarTab = 'item' | 'tool' | 'view';
-
-/* Sidebar derecho del viewport (equivale a la region UI de Blender): pestañas Item/Tool/View y
-   sus paneles. Expone los readouts que el viewport actualiza (cámara, estadísticas) y un setter
-   para reflejar la herramienta activa elegida en el toolbar. */
+/* Sidebar derecho del viewport (equivale a la region UI de Blender). Solo contiene controles que
+   funcionan: vista (órbita/proyección/frame), terreno y estadísticas de render. */
 export function buildViewportSidebar(options: ViewportSidebarOptions): ViewportSidebar {
   const { areaId, onFrameSelected } = options;
 
-  let activeTab: SidebarTab = 'view';
   let orbitSelect: HTMLSelectElement | null = null;
   let orthoCheck: HTMLInputElement | null = null;
   let wireframeCheck: HTMLInputElement | null = null;
@@ -36,48 +31,16 @@ export function buildViewportSidebar(options: ViewportSidebarOptions): ViewportS
   let octavesValue: HTMLElement | null = null;
   let cameraInfoEl: HTMLElement | null = null;
   let statsEl: HTMLElement | null = null;
-  let toolNameEl: HTMLElement | null = null;
-  const tabPanels = new Map<SidebarTab, HTMLElement>();
 
   const ui = createElement('aside', 'region barraLateral');
-
-  const tabs = createElement('div', 'pestanasSidebar');
-  const tabDefs: ReadonlyArray<{ id: SidebarTab; label: string }> = [
-    { id: 'item', label: 'Item' },
-    { id: 'tool', label: 'Tool' },
-    { id: 'view', label: 'View' },
-  ];
-  for (const tab of tabDefs) {
-    const button = createElement('button', 'boton pestanaSidebar', tab.label);
-    button.type = 'button';
-    button.classList.toggle('pestanaSidebarActiva', tab.id === activeTab);
-    button.addEventListener('click', () => {
-      activeTab = tab.id;
-      for (const child of tabs.children) {
-        child.classList.remove('pestanaSidebarActiva');
-      }
-      button.classList.add('pestanaSidebarActiva');
-      for (const [id, panel] of tabPanels) {
-        panel.style.display = id === tab.id ? '' : 'none';
-      }
-    });
-    tabs.appendChild(button);
-  }
-  ui.appendChild(tabs);
 
   const body = createElement('div', 'cuerpoSidebar');
   body.style.overflowY = 'auto';
   body.style.flex = '1 1 auto';
   ui.appendChild(body);
 
-  tabPanels.set('item', buildItemTab());
-  tabPanels.set('tool', buildToolTab());
-  tabPanels.set('view', buildViewTab());
-  body.append(tabPanels.get('view')!, tabPanels.get('item')!, tabPanels.get('tool')!);
-  tabPanels.get('item')!.style.display = 'none';
-  tabPanels.get('tool')!.style.display = 'none';
-
-  attachResize(ui, 'UI');
+  body.append(buildViewPanel(), buildTerrainPanel(), buildRenderPanel());
+  attachResize(ui);
 
   const sync = (state: EditorState): void => {
     if (orbitSelect !== null) {
@@ -109,63 +72,11 @@ export function buildViewportSidebar(options: ViewportSidebarOptions): ViewportS
   return {
     element: ui,
     readouts: { cameraInfo: cameraInfoEl!, stats: statsEl! },
-    setActiveTool: (name) => {
-      if (toolNameEl !== null) {
-        toolNameEl.textContent = name;
-      }
-    },
     sync,
   };
 
-  function buildItemTab(): HTMLElement {
-    const tab = createElement('div', 'pestanaCuerpo');
-
-    const transformBody = createElement('div', 'camposPanel');
-    transformBody.append(fieldRow('Location', makeVector('location')), fieldRow('Rotation', makeVector('rotation')), fieldRow('Scale', makeVector('scale', '1.000')));
-    tab.appendChild(createPanel({ title: 'Transform', body: transformBody }));
-
-    const terrainBody = createElement('div', 'camposPanel');
-    const state = editorStore.getState();
-    seedInput = makeNumber(state.terrain.seed, (seed) => editorStore.getState().setTerrain({ seed }));
-    amplitudeInput = makeRange(1, 60, 1, state.terrain.amplitude, (amplitude) =>
-      editorStore.getState().setTerrain({ amplitude }),
-    );
-    amplitudeValue = createElement('span', 'valorCampo', String(state.terrain.amplitude));
-    octavesInput = makeRange(1, 8, 1, state.terrain.octaves, (octaves) =>
-      editorStore.getState().setTerrain({ octaves }),
-    );
-    octavesValue = createElement('span', 'valorCampo', String(state.terrain.octaves));
-    wireframeCheck = makeCheckbox(state.wireframe, () => editorStore.getState().toggleWireframe());
-    const regenerateButton = createElement('button', 'boton botonPanel', 'Regenerar');
-    regenerateButton.type = 'button';
-    regenerateButton.addEventListener('click', () => editorStore.getState().regenerateTerrain());
-
-    terrainBody.append(
-      fieldRow('Semilla', seedInput),
-      fieldRow('Amplitud', amplitudeInput),
-      amplitudeValue,
-      fieldRow('Octavas', octavesInput),
-      octavesValue,
-      fieldRow('Wireframe', wireframeCheck),
-      regenerateButton,
-    );
-    tab.appendChild(createPanel({ title: 'Terreno', body: terrainBody }));
-    return tab;
-  }
-
-  function buildToolTab(): HTMLElement {
-    const tab = createElement('div', 'pestanaCuerpo');
-    const body = createElement('div', 'camposPanel');
-    toolNameEl = createElement('div', 'lecturaCampo', 'Move');
-    body.append(fieldRow('Active Tool', toolNameEl));
-    tab.appendChild(createPanel({ title: 'Herramienta', body }));
-    return tab;
-  }
-
-  function buildViewTab(): HTMLElement {
-    const tab = createElement('div', 'pestanaCuerpo');
-
-    const viewBody = createElement('div', 'camposPanel');
+  function buildViewPanel(): HTMLElement {
+    const bodyPanel = createElement('div', 'camposPanel');
     orbitSelect = makeSelect(
       [
         { value: 'turntable', label: 'Turntable' },
@@ -183,43 +94,58 @@ export function buildViewportSidebar(options: ViewportSidebarOptions): ViewportS
     frameButton.type = 'button';
     frameButton.addEventListener('click', onFrameSelected);
     cameraInfoEl = createElement('div', 'lecturaCampo');
-    viewBody.append(
+    bodyPanel.append(
       fieldRow('Órbita', orbitSelect),
       fieldRow('Ortográfica', orthoCheck),
       frameButton,
       cameraInfoEl,
     );
-    tab.appendChild(createPanel({ title: 'Vista', body: viewBody }));
+    return createPanel({ title: 'Vista', body: bodyPanel });
+  }
 
-    const renderBody = createElement('div', 'camposPanel');
+  function buildTerrainPanel(): HTMLElement {
+    const bodyPanel = createElement('div', 'camposPanel');
+    const state = editorStore.getState();
+    seedInput = makeNumber(state.terrain.seed, (seed) => editorStore.getState().setTerrain({ seed }));
+    amplitudeInput = makeRange(1, 60, 1, state.terrain.amplitude, (amplitude) =>
+      editorStore.getState().setTerrain({ amplitude }),
+    );
+    amplitudeValue = createElement('span', 'valorCampo', String(state.terrain.amplitude));
+    octavesInput = makeRange(1, 8, 1, state.terrain.octaves, (octaves) =>
+      editorStore.getState().setTerrain({ octaves }),
+    );
+    octavesValue = createElement('span', 'valorCampo', String(state.terrain.octaves));
+    wireframeCheck = makeCheckbox(state.wireframe, () => editorStore.getState().toggleWireframe());
+    const regenerateButton = createElement('button', 'boton botonPanel', 'Regenerar');
+    regenerateButton.type = 'button';
+    regenerateButton.addEventListener('click', () => editorStore.getState().regenerateTerrain());
+
+    bodyPanel.append(
+      fieldRow('Semilla', seedInput),
+      fieldRow('Amplitud', amplitudeInput),
+      amplitudeValue,
+      fieldRow('Octavas', octavesInput),
+      octavesValue,
+      fieldRow('Wireframe', wireframeCheck),
+      regenerateButton,
+    );
+    return createPanel({ title: 'Terreno', body: bodyPanel });
+  }
+
+  function buildRenderPanel(): HTMLElement {
+    const bodyPanel = createElement('div', 'camposPanel');
     statsEl = createElement('div', 'lecturaCampo', '—');
-    renderBody.appendChild(statsEl);
-    tab.appendChild(createPanel({ title: 'Render', body: renderBody }));
-    return tab;
+    bodyPanel.appendChild(statsEl);
+    return createPanel({ title: 'Render', body: bodyPanel });
   }
 
-  function makeVector(kind: 'location' | 'rotation' | 'scale', initial = '0.000'): HTMLElement {
-    const row = createElement('div', 'filaVector');
-    for (const axis of ['X', 'Y', 'Z'] as const) {
-      const input = createElement('input', 'numeroCampo numeroVector');
-      input.type = 'number';
-      input.step = '0.001';
-      input.value = initial;
-      input.disabled = true;
-      input.title = `${kind} ${axis}`;
-      row.appendChild(input);
-    }
-    return row;
-  }
-
-  function attachResize(sidebar: HTMLElement, region: 'TOOLS' | 'UI'): void {
+  function attachResize(sidebar: HTMLElement): void {
     const handle = createElement('div', 'asaRedimension asaRedimensionIzquierda');
     sidebar.appendChild(handle);
     onDrag(handle, (dx) => {
       const leaf = findLeaf(layoutStore.getState().root, areaId);
-      const current =
-        leaf?.regions.find((item) => item.type === region)?.size ?? defaultRegionSize(region);
-      layoutStore.getState().setRegionSize(areaId, region, current - dx);
+      const current = leaf?.regions.find((item) => item.type === 'UI')?.size ?? defaultRegionSize('UI');
+      layoutStore.getState().setRegionSize(areaId, 'UI', current - dx);
     });
   }
 }

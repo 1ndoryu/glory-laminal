@@ -116,7 +116,6 @@ export function registerViewportKeyboard(
     .add({ code: 'Numpad5', operator: 'view.toggle_ortho' })
     .add({ code: 'Period', operator: 'view.frame_selected' })
     .add({ code: 'NumpadDecimal', operator: 'view.frame_selected' })
-    .add({ code: 'KeyT', operator: 'ui.toggle_tools' })
     .add({ code: 'KeyN', operator: 'ui.toggle_sidebar' });
 
   const operators: Record<string, OperatorFn> = {
@@ -126,7 +125,6 @@ export function registerViewportKeyboard(
     'view.opposite': () => getCamera()?.smoothOppositeView(),
     'view.toggle_ortho': () => editorStore.getState().toggleOrthographic(),
     'view.frame_selected': () => getCamera()?.smoothFrameSelected(getTerrainRadius()),
-    'ui.toggle_tools': () => toggleRegion('TOOLS'),
     'ui.toggle_sidebar': () => toggleRegion('UI'),
   };
 
