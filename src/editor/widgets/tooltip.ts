@@ -3,10 +3,12 @@ import { createElement } from '../../platform/dom';
 const DELAY_MS = 250;
 const OFFSET_X = 14;
 const OFFSET_Y = 18;
+const MARGIN = 8;
 
 /* Tooltip global minimalista: una única burbuja para todo el editor. Escucha por delegación en
    `[title]`/`[data-tooltip]`, suprime el tooltip nativo del navegador y aparece junto al cursor
-   (o bajo el elemento al navegar con teclado). Devuelve la función de cleanup. */
+   (o bajo el elemento al navegar con teclado). Se voltea y se clampa contra los bordes de la
+   ventana para no salirse de la pantalla. Devuelve la función de cleanup. */
 export function initTooltips(): () => void {
   const tooltip = createElement('div', 'tooltipGlobal');
   tooltip.hidden = true;
@@ -14,6 +16,8 @@ export function initTooltips(): () => void {
 
   let current: HTMLElement | null = null;
   let showTimer: number | null = null;
+  let lastX = 0;
+  let lastY = 0;
 
   const clearTimer = (): void => {
     if (showTimer !== null) {
@@ -28,6 +32,31 @@ export function initTooltips(): () => void {
     current = null;
   };
 
+  /* Posiciona la burbuja cerca de (anchorX, anchorY) y la mantiene dentro del viewport: voltea a
+     la izquierda/arriba si se acercaría al borde derecho/inferior y clampa contra los márgenes. */
+  const place = (anchorX: number, anchorY: number): void => {
+    const width = tooltip.offsetWidth;
+    const height = tooltip.offsetHeight;
+    const maxX = window.innerWidth - MARGIN;
+    const maxY = window.innerHeight - MARGIN;
+
+    let left = anchorX + OFFSET_X;
+    let top = anchorY + OFFSET_Y;
+
+    if (left + width > maxX) {
+      left = anchorX - OFFSET_X - width;
+    }
+    if (top + height > maxY) {
+      top = anchorY - OFFSET_Y - height;
+    }
+
+    left = Math.max(MARGIN, Math.min(left, Math.max(MARGIN, maxX - width)));
+    top = Math.max(MARGIN, Math.min(top, Math.max(MARGIN, maxY - height)));
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  };
+
   const show = (): void => {
     const text = current?.dataset.tooltip ?? '';
     if (text === '') {
@@ -36,16 +65,12 @@ export function initTooltips(): () => void {
     }
     tooltip.textContent = text;
     tooltip.hidden = false;
-  };
-
-  const positionAt = (x: number, y: number): void => {
-    tooltip.style.left = `${x + OFFSET_X}px`;
-    tooltip.style.top = `${y + OFFSET_Y}px`;
+    place(lastX, lastY);
   };
 
   const positionNear = (element: HTMLElement): void => {
     const rect = element.getBoundingClientRect();
-    positionAt(rect.left, rect.bottom);
+    place(rect.left, rect.bottom);
   };
 
   /* Guarda el `title` en data-tooltip y lo retira para que no aparezca el nativo del navegador. */
@@ -71,14 +96,17 @@ export function initTooltips(): () => void {
     hide();
     current = element;
     capture(element);
-    positionAt(event.clientX, event.clientY);
+    lastX = event.clientX;
+    lastY = event.clientY;
     clearTimer();
     showTimer = window.setTimeout(show, DELAY_MS);
   };
 
   const onPointerMove = (event: PointerEvent): void => {
+    lastX = event.clientX;
+    lastY = event.clientY;
     if (current !== null && !tooltip.hidden) {
-      positionAt(event.clientX, event.clientY);
+      place(lastX, lastY);
     }
   };
 
