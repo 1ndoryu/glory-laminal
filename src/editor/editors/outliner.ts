@@ -1,12 +1,19 @@
 import { createElement } from '../../platform/dom';
 import type { RegionState } from '../layout/types';
+import { lucideIcon } from '../widgets/icons';
 import type { EditorInstance } from './types';
 
-const SCENE_ITEMS: ReadonlyArray<readonly [string, string]> = [
-  ['🌐', 'Escena'],
-  ['⛰️', 'Terreno'],
-  ['🎥', 'Cámara'],
-  ['💡', 'Luz direccional'],
+interface SceneItem {
+  icon: string;
+  name: string;
+  active?: boolean;
+}
+
+const SCENE_ITEMS: SceneItem[] = [
+  { icon: 'globe', name: 'Escena', active: true },
+  { icon: 'mountain', name: 'Terreno' },
+  { icon: 'camera', name: 'Cámara' },
+  { icon: 'sun', name: 'Luz direccional' },
 ];
 
 /* Editor de prueba para demostrar el registro de tipos: un Outliner estático equivalente al de
@@ -20,14 +27,18 @@ export class OutlinerEditor implements EditorInstance {
     host.style.display = 'flex';
     host.style.flexDirection = 'column';
 
-    const header = createElement('div', 'region cabeceraOutliner', 'Outliner');
+    const header = createElement('div', 'region cabeceraOutliner');
+    header.append(lucideIcon('list-tree', 14), createElement('span', '', 'Outliner'));
+
     const window = createElement('div', 'region ventanaOutliner');
     const list = createElement('ul', 'listaOutliner');
 
-    for (const [icon, name] of SCENE_ITEMS) {
-      const item = createElement('li', 'elementoOutliner');
-      item.append(createElement('span', 'iconoOutliner', icon), createElement('span', '', name));
-      list.appendChild(item);
+    for (const item of SCENE_ITEMS) {
+      const entry = createElement('li', item.active ? 'elementoOutliner activo' : 'elementoOutliner');
+      const icon = createElement('span', 'iconoOutliner');
+      icon.appendChild(lucideIcon(item.icon, 14));
+      entry.append(icon, createElement('span', '', item.name));
+      list.appendChild(entry);
     }
     window.appendChild(list);
     host.append(header, window);

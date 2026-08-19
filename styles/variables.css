@@ -1,41 +1,66 @@
 /*
-  Tokens de diseño centralizados, inspirados en el tema oscuro por defecto de Blender.
-  Ningún componente debe declarar colores, fuentes ni tamaños literales: usa estas variables.
+  Tokens de diseño centralizados, extraídos del tema "Default" de Blender
+  (release/datafiles/userdef/userdef_default_theme.c). Ningún componente declara
+  colores, fuentes ni tamaños literales: usa estas variables.
 */
 :root {
-  /* Superficies */
-  --fondoBase: #1d1d1d;
-  --fondoPanel: #262626;
-  --fondoHeader: #2e2e2e;
-  --fondoInput: #1a1a1a;
+  /* Superficies (wcol_* / space_* del tema por defecto) */
+  --fondoBase: #1d1d1d; /* fondo del editor (wcol_regular.item) */
+  --fondoTopbar: #181818; /* space_topbar.back */
+  --fondoStatusbar: #303030; /* space_statusbar.back */
+  --fondoHeader: #303030; /* space_view3d.header */
+  --fondoPanel: #303030; /* space_properties / sidebars */
+  --fondoPanelCabecera: #3d3d3d; /* panel_header / panel_back */
+  --fondoInput: #1d1d1d; /* wcol_text.inner */
+  --fondoInputSel: #181818; /* wcol_text.inner_sel */
+  --botonInterno: #545454; /* wcol_regular.inner */
+  --botonInternoMenu: #282828; /* wcol_menu.inner */
   --fondoHover: #3a3a3a;
-  --fondoActivo: #4d4d4d;
+  --fondoHoverMenu: #4772b3; /* wcol_menu_item.inner_sel */
+  --seleccion: #4772b3; /* panel_active / inner_sel (azul de selección) */
+  --seleccionBorde: #5680c2;
 
   /* Bordes */
-  --borde: #404040;
-  --bordeSutil: #333333;
+  --borde: #3d3d3d; /* wcol_regular.outline */
+  --bordeSuave: #333333;
+  --editorBorde: #161616; /* editor_border */
+  --editorContorno: rgba(255, 255, 255, 0.08); /* editor_outline */
+  --panelContorno: rgba(255, 255, 255, 0.07); /* panel_outline */
 
   /* Texto */
   --textoPrincipal: #e6e6e6;
-  --textoSecundario: #9a9a9a;
+  --textoSecundario: #989898; /* wcol_tab.text */
+  --textoMenu: #dddddd; /* wcol_menu_item.text */
   --textoDeshabilitado: #666666;
+  --textoStatusbar: #838383; /* space_statusbar.text */
 
   /* Acentos (paleta Blender) */
-  --acentoNaranja: #f5792a;
-  --acentoAzul: #3b82f6;
-  --verde: #7bc043;
-  --rojo: #e74c3c;
-  --amarillo: #f6d32d;
+  --acentoNaranja: #e87d0d; /* pestaña de workspace activa / objeto activo */
+  --acentoNaranjaClaro: #ffaf29; /* active_object */
+  --ejeX: #ff3352; /* xaxis */
+  --ejeY: #8bdc00; /* yaxis */
+  --ejeZ: #2890ff; /* zaxis */
+  --info: #28487d;
+  --exito: #188625;
+  --advertencia: #ac8737;
+  --error: #991616;
 
   /* Métricas y tipografía */
-  --radioPanel: 4px;
+  --radio: 4px; /* roundness 0.2 sobre un botón de ~20px */
+  --radioArea: 3px;
   --grosorBorde: 1px;
-  --fuentePrincipal: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --fuenteMono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --fuentePrincipal: 'Segoe UI', 'Inter', 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif;
+  --fuenteMono: 'Cascadia Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   /* Editor */
-  --alturaBarraSuperior: 32px;
-  --textoChico: 12px;
-  --textoMini: 11px;
-  --sombraMenu: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --alturaTopbar: 32px;
+  --alturaHeader: 26px;
+  --alturaStatusbar: 22px;
+  --textoChico: 11px;
+  --textoMini: 10px;
+  --sombraMenu: 0 6px 16px rgba(0, 0, 0, 0.5);
+
+  /* Recetas */
+  --emboss: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 45%);
+  --gradienteViewport: linear-gradient(180deg, #3d3d3d 0%, #303030 42%, #262626 100%);
 }

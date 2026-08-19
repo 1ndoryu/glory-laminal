@@ -2,8 +2,10 @@ import { createElement } from '../../platform/dom';
 
 export interface MenuItem {
   label: string;
+  icon?: string;
   onClick?: () => void;
   disabled?: boolean;
+  separatorBefore?: boolean;
 }
 
 const openDropdowns = new Set<HTMLElement>();
@@ -11,6 +13,8 @@ const openDropdowns = new Set<HTMLElement>();
 function closeAllMenus(): void {
   for (const dropdown of openDropdowns) {
     dropdown.hidden = true;
+    const trigger = dropdown.previousElementSibling;
+    trigger?.classList.remove('abierto');
   }
   openDropdowns.clear();
 }
@@ -19,25 +23,33 @@ function closeAllMenus(): void {
    resto; un clic fuera cierra todos (listener global instalado una única vez). */
 export function createMenu(label: string, items: MenuItem[]): HTMLElement {
   const root = createElement('div', 'menu');
-  const trigger = createElement('button', 'boton disparadorMenu', label);
+  const trigger = createElement('button', 'botonMenu', label);
   trigger.type = 'button';
   const dropdown = createElement('div', 'desplegableMenu');
   dropdown.hidden = true;
 
   const close = (): void => {
     dropdown.hidden = true;
+    trigger.classList.remove('abierto');
     openDropdowns.delete(dropdown);
   };
   const open = (): void => {
     closeAllMenus();
     dropdown.hidden = false;
+    trigger.classList.add('abierto');
     openDropdowns.add(dropdown);
   };
 
   for (const item of items) {
+    if (item.separatorBefore) {
+      dropdown.appendChild(createElement('div', 'separadorMenu'));
+    }
     const entry = createElement('button', 'boton elementoMenu', item.label);
     entry.type = 'button';
     entry.disabled = item.disabled ?? false;
+    if (item.icon !== undefined) {
+      entry.prepend(createElement('span', 'iconoOutliner', item.icon));
+    }
     entry.addEventListener('click', () => {
       close();
       if (!entry.disabled) {
@@ -71,6 +83,7 @@ if (typeof document !== 'undefined') {
     for (const dropdown of [...openDropdowns]) {
       if (dropdown.parentElement !== null && !dropdown.parentElement.contains(target)) {
         dropdown.hidden = true;
+        dropdown.previousElementSibling?.classList.remove('abierto');
         openDropdowns.delete(dropdown);
       }
     }

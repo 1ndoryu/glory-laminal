@@ -12,7 +12,16 @@ import { editorStore } from '../store';
 
 type Interaction = 'orbit' | 'pan' | 'zoom';
 
-/* Control de ratón del viewport: MMB órbita, Shift+MMB pan, Ctrl+MMB y rueda zoom. */
+/* Convierte una posición de puntero a coordenadas de dispositivo normalizadas [-1, 1]. */
+function toNdc(canvas: HTMLCanvasElement, clientX: number, clientY: number): [number, number] {
+  const rect = canvas.getBoundingClientRect();
+  const x = ((clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
+  const y = 1 - ((clientY - rect.top) / Math.max(1, rect.height)) * 2;
+  return [x, y];
+}
+
+/* Control de ratón del viewport: MMB órbita, Shift+MMB pan, Ctrl+MMB y rueda zoom (hacia el
+   cursor, como Blender). */
 export function attachViewportInput(
   canvas: HTMLCanvasElement,
   getCamera: () => OrbitCamera | null,
@@ -49,7 +58,9 @@ export function attachViewportInput(
     } else if (interaction === 'pan') {
       camera.pan(dx, dy);
     } else {
-      camera.zoomByFactor(Math.exp(dy * 0.006));
+      const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+      const [ndcX, ndcY] = toNdc(canvas, event.clientX, event.clientY);
+      camera.zoomAt(ndcX, ndcY, aspect, Math.exp(dy * 0.006));
     }
   });
 
@@ -65,7 +76,13 @@ export function attachViewportInput(
     'wheel',
     (event) => {
       event.preventDefault();
-      getCamera()?.zoomByFactor(Math.exp(event.deltaY * 0.0015));
+      const camera = getCamera();
+      if (camera === null) {
+        return;
+      }
+      const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+      const [ndcX, ndcY] = toNdc(canvas, event.clientX, event.clientY);
+      camera.zoomAt(ndcX, ndcY, aspect, Math.exp(event.deltaY * 0.0015));
     },
     { passive: false },
   );
@@ -103,12 +120,12 @@ export function registerViewportKeyboard(
     .add({ code: 'KeyN', operator: 'ui.toggle_sidebar' });
 
   const operators: Record<string, OperatorFn> = {
-    'view.front': () => getCamera()?.frontView(),
-    'view.right': () => getCamera()?.rightView(),
-    'view.top': () => getCamera()?.topView(),
-    'view.opposite': () => getCamera()?.oppositeView(),
+    'view.front': () => getCamera()?.smoothFrontView(),
+    'view.right': () => getCamera()?.smoothRightView(),
+    'view.top': () => getCamera()?.smoothTopView(),
+    'view.opposite': () => getCamera()?.smoothOppositeView(),
     'view.toggle_ortho': () => editorStore.getState().toggleOrthographic(),
-    'view.frame_selected': () => getCamera()?.frameSelected(getTerrainRadius()),
+    'view.frame_selected': () => getCamera()?.smoothFrameSelected(getTerrainRadius()),
     'ui.toggle_tools': () => toggleRegion('TOOLS'),
     'ui.toggle_sidebar': () => toggleRegion('UI'),
   };

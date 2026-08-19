@@ -18,6 +18,7 @@ export interface EditorState {
   /** Se incrementa en cada cambio de terreno para que los viewports reconstruyan su malla. */
   terrainNonce: number;
   toggleWireframe: () => void;
+  setWireframe: (wireframe: boolean) => void;
   toggleOrthographic: () => void;
   setOrbitMethod: (method: OrbitMethod) => void;
   setTerrain: (patch: Partial<TerrainSettings>) => void;
@@ -42,6 +43,7 @@ export const editorStore = createStore<EditorState>()((set) => ({
   terrain: DEFAULT_TERRAIN,
   terrainNonce: 0,
   toggleWireframe: () => set((state) => ({ wireframe: !state.wireframe })),
+  setWireframe: (wireframe) => set({ wireframe }),
   toggleOrthographic: () => set((state) => ({ orthographic: !state.orthographic })),
   setOrbitMethod: (orbitMethod) => set({ orbitMethod }),
   setTerrain: (patch) =>

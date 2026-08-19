@@ -3,9 +3,12 @@ import { Mat4 } from '../../core/math/Mat4';
 import { Vec3 } from '../../core/math/Vec3';
 import { RenderLoop } from '../../core/loop/RenderLoop';
 import { unregisterEditorInput } from '../../input/InputManager';
+import { buildGridLinesData } from '../../render/grid';
+import { GridLines } from '../../render/gl/GridLines';
 import { Mesh } from '../../render/gl/Mesh';
 import { ShaderProgram } from '../../render/gl/ShaderProgram';
 import { WebGL2Renderer } from '../../render/gl/WebGL2Renderer';
+import { GRID_FRAGMENT, GRID_VERTEX } from '../../render/shaders/grid';
 import {
   TERRAIN_FRAGMENT,
   TERRAIN_VERTEX,
@@ -18,14 +21,16 @@ import type { RegionState } from '../layout/types';
 import { editorStore } from '../store';
 import type { EditorInstance } from './types';
 import { buildViewportChrome, type ViewportChrome } from './viewport3dChrome';
+import { buildNavigationGizmo } from './viewport3dGizmo';
 import { attachViewportInput, registerViewportKeyboard } from './viewport3dInput';
 
 const LIGHT_DIRECTION = new Vec3(0.45, 0.55, 0.85);
-const WIRE_COLOR = new Vec3(0.14, 0.15, 0.17);
+/* Gris claro, visible sobre el degradado oscuro, equivalente al wireframe shading de Blender. */
+const WIRE_COLOR = new Vec3(0.72, 0.73, 0.76);
 const STATS_INTERVAL_MS = 250;
 
-/* Editor 3D Viewport (núcleo de motor): posee el canvas WebGL2, la cámara orbital, la malla de
-   terreno y su bucle de render. El chrome DOM vive en viewport3dChrome; la entrada en
+/* Editor 3D Viewport (núcleo de motor): posee el canvas WebGL2, la cámara orbital, el grid, la
+   malla de terreno y su bucle de render. El chrome DOM vive en viewport3dChrome; la entrada en
    viewport3dInput. Cada instancia es independiente: dos viewports partidos orbitan por separado. */
 export class Viewport3DEditor implements EditorInstance {
   private areaId = 'viewport';
@@ -34,7 +39,9 @@ export class Viewport3DEditor implements EditorInstance {
   private renderer: WebGL2Renderer | null = null;
   private terrainProgram: ShaderProgram | null = null;
   private wireframeProgram: ShaderProgram | null = null;
+  private gridProgram: ShaderProgram | null = null;
   private mesh: Mesh | null = null;
+  private grid: GridLines | null = null;
   private camera: OrbitCamera | null = null;
   private loop: RenderLoop | null = null;
   private unsubscribeStore: (() => void) | null = null;
@@ -49,7 +56,7 @@ export class Viewport3DEditor implements EditorInstance {
 
     this.chrome = buildViewportChrome({
       areaId: this.areaId,
-      onFrameSelected: () => this.camera?.frameSelected(this.terrainRadius),
+      onFrameSelected: () => this.camera?.smoothFrameSelected(this.terrainRadius),
     });
     const elements = this.chrome.elements;
     host.append(elements.header, elements.tools, elements.window, elements.ui, elements.footer);
@@ -61,6 +68,8 @@ export class Viewport3DEditor implements EditorInstance {
     gl.depthFunc(gl.LESS);
     this.terrainProgram = new ShaderProgram(gl, TERRAIN_VERTEX, TERRAIN_FRAGMENT);
     this.wireframeProgram = new ShaderProgram(gl, WIREFRAME_VERTEX, WIREFRAME_FRAGMENT);
+    this.gridProgram = new ShaderProgram(gl, GRID_VERTEX, GRID_FRAGMENT);
+    this.grid = new GridLines(gl, buildGridLinesData());
 
     this.camera = new OrbitCamera({
       target: new Vec3(0, 0, 0),
@@ -71,6 +80,8 @@ export class Viewport3DEditor implements EditorInstance {
 
     this.buildTerrain();
     this.camera.frameSelected(this.terrainRadius);
+
+    elements.window.appendChild(buildNavigationGizmo(() => this.camera));
 
     attachViewportInput(elements.canvas, () => this.camera);
     registerViewportKeyboard(host, {
@@ -120,29 +131,35 @@ export class Viewport3DEditor implements EditorInstance {
     this.unsubscribeStore?.();
     unregisterEditorInput(this.areaId);
     this.mesh?.dispose();
+    this.grid?.dispose();
     this.terrainProgram?.dispose();
     this.wireframeProgram?.dispose();
+    this.gridProgram?.dispose();
     this.host = null;
   }
 
-  private readonly frame = (): void => {
+  private readonly frame = (deltaSeconds: number): void => {
     if (this.renderer === null || this.camera === null || this.chrome === null) {
       return;
     }
     const state = editorStore.getState();
     this.camera.orthographic = state.orthographic;
     this.camera.orbitMethod = state.orbitMethod;
+    this.camera.update(deltaSeconds);
 
     this.renderer.resizeToDisplaySize();
-    this.renderer.clear(0.09, 0.09, 0.115);
+    /* Fondo transparente: el degradado del viewport lo pinta el CSS (`.ventanaViewport`). */
+    this.renderer.clear(0, 0, 0, 0);
+
+    const { canvas } = this.chrome.elements;
+    const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    const view = this.camera.viewMatrix();
+    const projection = this.camera.projectionMatrix(aspect);
+    const model = Mat4.identity();
+
+    this.drawGrid(view, projection);
 
     if (this.mesh !== null && this.terrainProgram !== null && this.wireframeProgram !== null) {
-      const canvas = this.chrome.elements.canvas;
-      const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
-      const view = this.camera.viewMatrix();
-      const projection = this.camera.projectionMatrix(aspect);
-      const model = Mat4.identity();
-
       if (state.wireframe) {
         this.wireframeProgram.use();
         this.wireframeProgram.setMat4('uModel', model.elements);
@@ -163,6 +180,25 @@ export class Viewport3DEditor implements EditorInstance {
     }
     this.updateStats();
   };
+
+  private drawGrid(view: Mat4, projection: Mat4): void {
+    if (this.grid === null || this.gridProgram === null || this.renderer === null) {
+      return;
+    }
+    const gl = this.renderer.context;
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    this.gridProgram.use();
+    this.gridProgram.setMat4('uView', view.elements);
+    this.gridProgram.setMat4('uProjection', projection.elements);
+    this.grid.bind();
+    this.grid.draw();
+
+    gl.disable(gl.BLEND);
+    gl.enable(gl.DEPTH_TEST);
+  }
 
   private buildTerrain(): void {
     if (this.renderer === null || this.chrome === null) {

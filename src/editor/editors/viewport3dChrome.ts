@@ -3,9 +3,9 @@ import { defaultRegionSize, findLeaf } from '../layout/layoutTree';
 import { layoutStore } from '../layout/layoutStore';
 import type { RegionType } from '../layout/types';
 import { editorStore, type EditorState } from '../store';
-import { fieldRow, makeCheckbox, makeNumber, makeRange, makeSelect } from '../widgets/fields';
+import { lucideIcon } from '../widgets/icons';
 import { createMenu } from '../widgets/menu';
-import { createPanel } from '../widgets/panel';
+import { buildViewportSidebar, type ViewportSidebar } from './viewport3dSidebar';
 
 export interface ViewportReadouts {
   fps: HTMLElement;
@@ -32,31 +32,35 @@ export interface ViewportChromeOptions {
   onFrameSelected: () => void;
 }
 
-/* Construye el chrome DOM del 3D Viewport (HEADER/TOOLS/UI/FOOTER + canvas). Mantiene sus
-   controles en privado y expone `sync` para reflejar el estado global del editor en los widgets.
-   El motor (WebGL/cámara/terreno) vive en Viewport3DEditor, no aquí. */
+type ToolId = 'select' | 'cursor' | 'move' | 'rotate' | 'scale' | 'annotate' | 'measure';
+
+const TOOLS: ReadonlyArray<{ id: ToolId; icon: string; name: string }> = [
+  { id: 'select', icon: 'mouse-pointer', name: 'Select Box' },
+  { id: 'cursor', icon: 'crosshair', name: '3D Cursor' },
+  { id: 'move', icon: 'move', name: 'Move' },
+  { id: 'rotate', icon: 'rotate-3d', name: 'Rotate' },
+  { id: 'scale', icon: 'scaling', name: 'Scale' },
+  { id: 'annotate', icon: 'pen-line', name: 'Annotate' },
+  { id: 'measure', icon: 'ruler', name: 'Measure' },
+];
+
+/* Construye el chrome DOM del 3D Viewport (HEADER/TOOLS/FOOTER + canvas) y delega el sidebar en
+   viewport3dSidebar. Mantiene sus controles en privado y expone `sync` para reflejar el estado
+   global. El motor (WebGL/cámara/terreno) vive en Viewport3DEditor, no aquí. */
 export function buildViewportChrome(options: ViewportChromeOptions): ViewportChrome {
   const { areaId, onFrameSelected } = options;
 
-  let wireframeButton: HTMLButtonElement | null = null;
-  let orthoButton: HTMLButtonElement | null = null;
-  let orbitButton: HTMLButtonElement | null = null;
-  let orbitSelect: HTMLSelectElement | null = null;
-  let orthoCheck: HTMLInputElement | null = null;
-  let wireframeCheck: HTMLInputElement | null = null;
-  let seedInput: HTMLInputElement | null = null;
-  let amplitudeInput: HTMLInputElement | null = null;
-  let amplitudeValue: HTMLElement | null = null;
-  let octavesInput: HTMLInputElement | null = null;
-  let octavesValue: HTMLElement | null = null;
+  let wireframeIcon: HTMLElement | null = null;
+  let solidIcon: HTMLElement | null = null;
+  let renderedIcon: HTMLElement | null = null;
+  let orbitButton: HTMLElement | null = null;
+  let orthoButton: HTMLElement | null = null;
   let fpsEl: HTMLElement | null = null;
   let cameraEl: HTMLElement | null = null;
-  let cameraInfoEl: HTMLElement | null = null;
-  let statsEl: HTMLElement | null = null;
 
+  const sidebar: ViewportSidebar = buildViewportSidebar({ areaId, onFrameSelected });
   const header = buildHeader();
-  const tools = buildTools();
-  const ui = buildUi();
+  const tools = buildTools(sidebar.setActiveTool);
   const window = createElement('div', 'region ventanaViewport');
   const canvas = document.createElement('canvas');
   canvas.className = 'lienzoViewport';
@@ -67,75 +71,63 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
     [header, 'header'],
     [tools, 'tools'],
     [window, 'window'],
-    [ui, 'ui'],
+    [sidebar.element, 'ui'],
     [footer, 'footer'],
   ] as const) {
     region.style.gridArea = name;
   }
 
   const sync = (state: EditorState): void => {
-    if (wireframeButton !== null) {
-      wireframeButton.textContent = state.wireframe ? 'Wireframe' : 'Sólido';
-    }
-    if (orthoButton !== null) {
-      orthoButton.textContent = state.orthographic ? 'Ortográfica' : 'Perspectiva';
-    }
-    if (orbitButton !== null) {
-      orbitButton.textContent = state.orbitMethod === 'turntable' ? 'Turntable' : 'Trackball';
-    }
-    if (orbitSelect !== null) {
-      orbitSelect.value = state.orbitMethod;
-    }
-    if (orthoCheck !== null) {
-      orthoCheck.checked = state.orthographic;
-    }
-    if (wireframeCheck !== null) {
-      wireframeCheck.checked = state.wireframe;
-    }
-    if (seedInput !== null) {
-      seedInput.value = String(state.terrain.seed);
-    }
-    if (amplitudeInput !== null) {
-      amplitudeInput.value = String(state.terrain.amplitude);
-    }
-    if (amplitudeValue !== null) {
-      amplitudeValue.textContent = String(state.terrain.amplitude);
-    }
-    if (octavesInput !== null) {
-      octavesInput.value = String(state.terrain.octaves);
-    }
-    if (octavesValue !== null) {
-      octavesValue.textContent = String(state.terrain.octaves);
-    }
+    wireframeIcon?.classList.toggle('activo', state.wireframe);
+    solidIcon?.classList.toggle('activo', !state.wireframe);
+    renderedIcon?.classList.toggle('activo', false);
+    orbitButton?.classList.toggle('activo', state.orbitMethod === 'trackball');
+    orbitButton?.setAttribute(
+      'title',
+      state.orbitMethod === 'turntable' ? 'Órbita: Turntable' : 'Órbita: Trackball',
+    );
+    orthoButton?.classList.toggle('activo', state.orthographic);
+    orthoButton?.setAttribute(
+      'title',
+      state.orthographic ? 'Proyección: Ortográfica (Numpad 5)' : 'Proyección: Perspectiva (Numpad 5)',
+    );
+    sidebar.sync(state);
   };
 
   return {
-    elements: { header, tools, ui, window, footer, canvas },
+    elements: { header, tools, ui: sidebar.element, window, footer, canvas },
     readouts: {
       fps: fpsEl!,
       camera: cameraEl!,
-      cameraInfo: cameraInfoEl!,
-      stats: statsEl!,
+      cameraInfo: sidebar.readouts.cameraInfo,
+      stats: sidebar.readouts.stats,
     },
     sync,
   };
 
   function buildHeader(): HTMLElement {
     const element = createElement('header', 'region cabeceraViewport');
-    element.appendChild(createElement('span', 'nombreEditor', '3D Viewport'));
+
+    const editorSelector = createElement('button', 'botonMenu selectorEditor');
+    editorSelector.type = 'button';
+    editorSelector.title = 'Tipo de editor';
+    editorSelector.append(lucideIcon('box', 14), createElement('span', '', '3D Viewport'));
+    element.appendChild(editorSelector);
 
     element.appendChild(createMenu('Object Mode', [{ label: 'Próximamente', disabled: true }]));
     element.appendChild(
       createMenu('View', [
         {
           label: 'Split Vertical (Outliner)',
+          icon: '▥',
           onClick: () => layoutStore.getState().splitArea(areaId, 'row', 'outliner'),
         },
         {
           label: 'Split Horizontal (Outliner)',
+          icon: '▤',
           onClick: () => layoutStore.getState().splitArea(areaId, 'column', 'outliner'),
         },
-        { label: 'Join Area', onClick: () => layoutStore.getState().joinArea(areaId) },
+        { label: 'Join Area', icon: '◫', onClick: () => layoutStore.getState().joinArea(areaId) },
       ]),
     );
     for (const name of ['Select', 'Add', 'Object']) {
@@ -144,159 +136,117 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
 
     element.appendChild(createElement('span', 'separador'));
 
-    wireframeButton = createElement('button', 'boton botonCabecera');
-    wireframeButton.type = 'button';
-    wireframeButton.addEventListener('click', () => editorStore.getState().toggleWireframe());
+    const shadingGroup = createElement('div', 'grupoIconos');
+    wireframeIcon = makeIconToggle('box', 'Wireframe', () => editorStore.getState().setWireframe(true));
+    solidIcon = makeIconToggle('circle', 'Sólido', () => editorStore.getState().setWireframe(false));
+    renderedIcon = makeIconToggle('sun', 'Renderizado (próximamente)', () =>
+      editorStore.getState().setWireframe(false),
+    );
+    shadingGroup.append(wireframeIcon, solidIcon, renderedIcon);
+    element.appendChild(shadingGroup);
 
-    orthoButton = createElement('button', 'boton botonCabecera');
-    orthoButton.type = 'button';
-    orthoButton.addEventListener('click', () => editorStore.getState().toggleOrthographic());
+    const overlay = makeIconToggle('eye', 'Overlays', () => overlay.classList.toggle('activo'));
+    overlay.classList.add('activo');
+    element.appendChild(overlay);
 
-    orbitButton = createElement('button', 'boton botonCabecera');
-    orbitButton.type = 'button';
-    orbitButton.addEventListener('click', () => {
+    element.appendChild(createElement('span', 'separadorChico'));
+
+    orbitButton = makeIconToggle('orbit', 'Órbita', () => {
       const state = editorStore.getState();
       state.setOrbitMethod(state.orbitMethod === 'turntable' ? 'trackball' : 'turntable');
     });
+    orthoButton = makeIconToggle('camera', 'Perspectiva/Ortográfica', () =>
+      editorStore.getState().toggleOrthographic(),
+    );
+    const frameButton = makeIconToggle('frame', 'Frame Selected', onFrameSelected);
+    element.append(orbitButton, orthoButton, frameButton);
 
-    element.append(wireframeButton, orthoButton, orbitButton);
     return element;
   }
 
-  function buildTools(): HTMLElement {
+  function makeIconToggle(icon: string, title: string, onClick: () => void): HTMLButtonElement {
+    const button = createElement('button', 'botonIcono');
+    button.type = 'button';
+    button.title = title;
+    button.append(lucideIcon(icon, 14));
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  function buildTools(onToolChange: (name: string) => void): HTMLElement {
     const tools = createElement('aside', 'region barraLateral');
 
-    const sidebarHeader = createElement('div', 'cabeceraBarra');
-    const collapse = createElement('button', 'boton botonColapsar', '◂');
+    const header = createElement('div', 'cabeceraBarra');
+    const collapse = createElement('button', 'boton botonIcono botonColapsar');
     collapse.type = 'button';
     collapse.title = 'Ocultar herramientas (T)';
+    collapse.append(lucideIcon('chevron-left', 14));
     collapse.addEventListener('click', () =>
       layoutStore.getState().setRegionVisible(areaId, 'TOOLS', false),
     );
-    sidebarHeader.append(collapse, createElement('span', 'tituloBarra', 'Herramientas'));
-    tools.appendChild(sidebarHeader);
+    header.appendChild(collapse);
+    tools.appendChild(header);
 
-    const body = createElement('div', 'listaHerramientas');
-    const move = createElement('button', 'boton botonHerramienta botonHerramientaActiva', 'Move');
-    const rotate = createElement('button', 'boton botonHerramienta', 'Rotate');
-    const scale = createElement('button', 'boton botonHerramienta', 'Scale');
-    move.type = 'button';
-    rotate.type = 'button';
-    scale.type = 'button';
-    body.append(move, rotate, scale);
-    tools.appendChild(createPanel({ title: 'Herramientas', body }));
+    const list = createElement('div', 'listaHerramientas');
+    for (const tool of TOOLS) {
+      const button = createElement('button', 'boton botonHerramienta');
+      button.type = 'button';
+      button.title = tool.name;
+      button.append(lucideIcon(tool.icon, 18));
+      button.classList.toggle('botonHerramientaActiva', tool.id === 'move');
+      button.addEventListener('click', () => {
+        for (const child of list.children) {
+          child.classList.remove('botonHerramientaActiva');
+        }
+        button.classList.add('botonHerramientaActiva');
+        onToolChange(tool.name);
+      });
+      list.appendChild(button);
+    }
+    tools.appendChild(list);
 
     attachSidebarResize(tools, 'TOOLS');
     return tools;
   }
 
-  function buildUi(): HTMLElement {
-    const ui = createElement('aside', 'region barraLateral');
-
-    const sidebarHeader = createElement('div', 'cabeceraBarra');
-    const collapse = createElement('button', 'boton botonColapsar', '▸');
-    collapse.type = 'button';
-    collapse.title = 'Ocultar sidebar (N)';
-    collapse.addEventListener('click', () =>
-      layoutStore.getState().setRegionVisible(areaId, 'UI', false),
-    );
-    sidebarHeader.append(collapse, createElement('span', 'tituloBarra', 'Sidebar'));
-    ui.appendChild(sidebarHeader);
-
-    const viewBody = createElement('div', 'camposPanel');
-    orbitSelect = makeSelect(
-      [
-        { value: 'turntable', label: 'Turntable' },
-        { value: 'trackball', label: 'Trackball' },
-      ],
-      (value) =>
-        editorStore.getState().setOrbitMethod(value === 'trackball' ? 'trackball' : 'turntable'),
-    );
-    orthoCheck = makeCheckbox(false, (checked) => {
-      if (checked !== editorStore.getState().orthographic) {
-        editorStore.getState().toggleOrthographic();
-      }
-    });
-    const frameButton = createElement('button', 'boton botonRelleno botonPanel', 'Frame Selected');
-    frameButton.type = 'button';
-    frameButton.addEventListener('click', onFrameSelected);
-    cameraInfoEl = createElement('div', 'lecturaCampo');
-    viewBody.append(
-      fieldRow('Órbita', orbitSelect),
-      fieldRow('Ortográfica', orthoCheck),
-      frameButton,
-      cameraInfoEl,
-    );
-    ui.appendChild(createPanel({ title: 'Vista', body: viewBody }));
-
-    const terrainBody = createElement('div', 'camposPanel');
-    const state = editorStore.getState();
-    seedInput = makeNumber(state.terrain.seed, (seed) =>
-      editorStore.getState().setTerrain({ seed }),
-    );
-    amplitudeInput = makeRange(1, 60, 1, state.terrain.amplitude, (amplitude) =>
-      editorStore.getState().setTerrain({ amplitude }),
-    );
-    amplitudeValue = createElement('span', 'valorCampo', String(state.terrain.amplitude));
-    octavesInput = makeRange(1, 8, 1, state.terrain.octaves, (octaves) =>
-      editorStore.getState().setTerrain({ octaves }),
-    );
-    octavesValue = createElement('span', 'valorCampo', String(state.terrain.octaves));
-    wireframeCheck = makeCheckbox(state.wireframe, () => editorStore.getState().toggleWireframe());
-    const regenerateButton = createElement('button', 'boton botonRelleno botonPanel', 'Regenerar');
-    regenerateButton.type = 'button';
-    regenerateButton.addEventListener('click', () => editorStore.getState().regenerateTerrain());
-
-    terrainBody.append(
-      fieldRow('Semilla', seedInput),
-      fieldRow('Amplitud', amplitudeInput),
-      amplitudeValue,
-      fieldRow('Octavas', octavesInput),
-      octavesValue,
-      fieldRow('Wireframe', wireframeCheck),
-      regenerateButton,
-    );
-    ui.appendChild(createPanel({ title: 'Terreno', body: terrainBody }));
-
-    const renderBody = createElement('div', 'camposPanel');
-    statsEl = createElement('div', 'lecturaCampo', '—');
-    renderBody.appendChild(statsEl);
-    ui.appendChild(createPanel({ title: 'Render', body: renderBody }));
-
-    attachSidebarResize(ui, 'UI');
-    return ui;
-  }
-
   function buildFooter(): HTMLElement {
     const footer = createElement('footer', 'region pieViewport');
+
+    const left = createElement('div', 'grupoPie');
+    left.append(
+      createElement('span', 'datoViewport', 'Object Mode'),
+      createElement(
+        'span',
+        'ayudaViewport',
+        'MMB órbita · Shift+MMB pan · rueda/Ctrl+MMB zoom · numpad 1/3/7/9 vistas · 5 orto · . frame',
+      ),
+    );
+    footer.appendChild(left);
+
+    footer.appendChild(createElement('span', 'separador'));
+
+    const right = createElement('div', 'grupoPie grupoPieDerecha');
     fpsEl = createElement('span', 'datoViewport');
     cameraEl = createElement('span', 'datoViewport');
-    const hint = createElement(
-      'span',
-      'ayudaViewport',
-      'MMB órbita · Shift+MMB pan · rueda zoom · 1/3/7 vistas · 5 orto · T/N barras',
-    );
-    footer.append(
-      createElement('span', 'separador'),
-      cameraEl,
+    right.append(
       fpsEl,
-      createElement('span', 'separador'),
-      hint,
+      createElement('span', 'datoViewport punto', '·'),
+      cameraEl,
+      createElement('span', 'version', 'Glory Laminal 0.1.0'),
     );
+    footer.appendChild(right);
+
     return footer;
   }
 
   function attachSidebarResize(sidebar: HTMLElement, region: RegionType): void {
-    const className =
-      region === 'UI' ? 'asaRedimension asaRedimensionIzquierda' : 'asaRedimension';
-    const handle = createElement('div', className);
+    const handle = createElement('div', 'asaRedimension');
     sidebar.appendChild(handle);
     onDrag(handle, (dx) => {
       const leaf = findLeaf(layoutStore.getState().root, areaId);
       const current =
         leaf?.regions.find((item) => item.type === region)?.size ?? defaultRegionSize(region);
-      const delta = region === 'TOOLS' ? dx : -dx;
-      layoutStore.getState().setRegionSize(areaId, region, current + delta);
+      layoutStore.getState().setRegionSize(areaId, region, current + dx);
     });
   }
 }

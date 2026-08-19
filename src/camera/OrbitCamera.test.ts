@@ -76,4 +76,32 @@ describe('OrbitCamera', () => {
     camera.frameSelected(0);
     expect(camera.distance).toBeGreaterThan(0);
   });
+
+  it('smoothView anima la elevación hacia la vista objetivo', () => {
+    const camera = new OrbitCamera({ distance: 10, azimuth: 0, elevation: 1.0 });
+    const initial = camera.elevation;
+    camera.smoothTopView();
+    camera.update(0.11);
+    expect(camera.elevation).toBeLessThan(initial);
+    expect(camera.elevation).toBeGreaterThan(0);
+    camera.update(0.5);
+    expect(camera.elevation).toBeCloseTo(0.001, 2);
+  });
+
+  it('zoomAt al centro sólo cambia la distancia', () => {
+    const camera = new OrbitCamera({ distance: 10, azimuth: 0, elevation: Math.PI / 2 });
+    const before = camera.target.clone();
+    camera.zoomAt(0, 0, 1, 0.5);
+    expect(camera.distance).toBeCloseTo(5);
+    expect(camera.target.x).toBeCloseTo(before.x);
+    expect(camera.target.y).toBeCloseTo(before.y);
+  });
+
+  it('zoomAt desplaza el target para mantener el punto bajo el cursor', () => {
+    const camera = new OrbitCamera({ distance: 10, azimuth: 0, elevation: Math.PI / 2 });
+    const before = camera.target.clone();
+    camera.zoomAt(0.5, 0, 1, 0.5);
+    expect(camera.distance).toBeCloseTo(5);
+    expect(camera.target.distanceTo(before)).toBeGreaterThan(0);
+  });
 });

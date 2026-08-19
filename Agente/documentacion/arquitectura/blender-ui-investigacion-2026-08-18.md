@@ -46,14 +46,27 @@ Window
   turntable por defecto; sensibilidad configurable por píxel.
 - Numpad **1/3/7** = vistas front/side/top; **9** = opuesta; **5** = alternar
   orto/perspectiva; **.** = frame selected; **Alt+MMB** = snap a vista ortográfica cercana.
-- Fly mode (`Shift+F`): WASD + R/F (arriba/abajo). Contexto de zoom al cursor.
+- **Smooth view**: los cambios de vista (numpad, frame selected, gizmo) se animan con una
+  interpolación suave (~0,2 s, ease-out), no saltan. En turntable el azimuth gira por el camino
+  más corto.
+- **Zoom to mouse position**: el dolly mantiene fijo el punto del mundo bajo el cursor
+  (raycast al plano perpendicular a la vista por el target y re-posicionado del target).
+- **Navigation gizmo**: esfera con ejes X/Y/Z en la esquina superior derecha; arrastrar orbita,
+  hacer clic en un eje salta a esa vista (X=derecha, Y=frente, Z=arriba).
 
-## Tema (referencia visual)
+## Tema (referencia visual) — valores exactos del tema Default
 
-- Tema oscuro por defecto: fondo ≈ `#1d1d1d`, paneles ≈ `#262626`, headers ≈ `#2e2e2e`,
-  bordes ≈ `#3d3d3d`/`#404040`, texto ≈ `#e6e6e6`, acento naranja ≈ `#f5792a`, selección
-  azul ≈ `#3b82f6`. Totalmente personalizable por editor. Radios de esquina sutiles, bordes
-  de 1 px, contraste moderado.
+Extraídos de `release/datafiles/userdef/userdef_default_theme.c` (fuente oficial):
+
+- Editor: fondo `#1d1d1d`, topbar `#181818`, statusbar `#303030`.
+- Header de área (view3d): `#303030`; paneles: cabecera/cuerpo `#3d3d3d` sobre fondo `#303030`.
+- Botones (`wcol_regular`): interior `#545454`, borde `#3d3d3d`, texto `#e6e6e6`, roundness 0.2.
+- Selección / hover de menú: azul `#4772b3` (`inner_sel`/`panel_active`); texto seleccionado blanco.
+- Pestañas de workspace: texto `#989898`, activa con acento naranja `#e87d0d` (objeto activo `#ffaf29`).
+- View3D: fondo `#3d3d3d` con degradado, grid `#545454` (alpha 0.5), ejes xaxis `#ff3352`,
+  yaxis `#8bdc00`, zaxis `#2890ff`.
+- Menús: fondo `#282828`, item seleccionado `#4772b3`, texto `#dddddd`.
+- Bordes entre editores: `#161616` (`editor_border`). Tipografía ≈ DejaVu Sans/Inter 11px.
 
 ## Mapeo a nuestra implementación (web)
 

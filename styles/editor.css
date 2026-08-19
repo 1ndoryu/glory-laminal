@@ -1,5 +1,6 @@
-/* Chrome del editor tipo Blender. Clases en español camelCase; toda decisión visual se apoya en
-   los tokens de variables.css o en recetas compartidas (`.boton`, `.botonRelleno`, `.panel`). */
+/* Layout del chrome del editor (clon de Blender): topbar, áreas, regiones, sidebars, footer,
+   outliner y gizmo. Las recetas de widgets (botones/menús/paneles/campos) viven en widgets.css;
+   los tokens en variables.css. */
 
 html,
 body,
@@ -14,6 +15,8 @@ body {
   font-family: var(--fuentePrincipal);
   font-size: var(--textoChico);
   overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
@@ -23,24 +26,7 @@ button {
   background: none;
   border: none;
   cursor: pointer;
-}
-
-/* --- Recetas compartidas (atómicas) --- */
-
-.boton {
-  border-radius: var(--radioPanel);
-  color: var(--textoSecundario);
-  background-color: transparent;
-}
-
-.boton:hover {
-  background-color: var(--fondoHover);
-  color: var(--textoPrincipal);
-}
-
-.botonRelleno {
-  background-color: var(--fondoHeader);
-  border: var(--grosorBorde) solid var(--borde);
+  padding: 0;
 }
 
 /* --- Estructura general --- */
@@ -54,40 +40,13 @@ button {
 .barraSuperior {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: var(--alturaBarraSuperior);
-  padding: 0 10px;
-  background-color: var(--fondoHeader);
+  gap: 6px;
+  height: var(--alturaTopbar);
+  padding: 0 6px;
+  background-color: var(--fondoTopbar);
   border-bottom: var(--grosorBorde) solid var(--borde);
   flex: 0 0 auto;
-}
-
-.marca {
-  font-weight: 600;
-  color: var(--acentoNaranja);
-  letter-spacing: 0.4px;
-}
-
-.pestanas {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 16px;
-}
-
-.pestana {
-  padding: 4px 12px;
-  border-radius: var(--radioPanel);
-  color: var(--textoSecundario);
-}
-
-.pestana:hover {
-  background-color: var(--fondoHover);
-}
-
-.pestanaActiva {
-  background-color: var(--fondoActivo);
-  color: var(--textoPrincipal);
+  font-size: var(--textoChico);
 }
 
 .contenidoEditor {
@@ -95,6 +54,37 @@ button {
   position: relative;
   min-height: 0;
   overflow: hidden;
+  padding: 4px;
+  background-color: var(--editorBorde);
+}
+
+/* --- Topbar --- */
+
+.pestanas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.menusTopbar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: var(--grosorBorde) solid var(--borde);
+}
+
+.controlesTopbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.version {
+  color: var(--textoSecundario);
+  font-size: var(--textoChico);
+  padding: 0 4px;
 }
 
 /* --- Árbol de áreas (splits) --- */
@@ -104,12 +94,15 @@ button {
   height: 100%;
   overflow: hidden;
   background-color: var(--fondoBase);
+  border: var(--grosorBorde) solid var(--editorBorde);
+  border-radius: var(--radioArea);
 }
 
 .division {
   display: grid;
   width: 100%;
   height: 100%;
+  gap: 4px;
 }
 
 .panelDivision {
@@ -119,11 +112,12 @@ button {
 }
 
 .asaDivision {
-  background-color: var(--borde);
+  background-color: var(--editorBorde);
+  border-radius: 2px;
 }
 
 .asaDivision:hover {
-  background-color: var(--acentoNaranja);
+  background-color: #2c2c2c;
 }
 
 .divisionFila {
@@ -153,32 +147,41 @@ button {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 0 8px;
+  padding: 0 4px;
   background-color: var(--fondoHeader);
   border-bottom: var(--grosorBorde) solid var(--borde);
   overflow: hidden;
   white-space: nowrap;
 }
 
-.nombreEditor {
-  margin-right: 8px;
+.selectorEditor {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: var(--alturaHeader);
+  padding: 0 8px 0 6px;
+  border-radius: var(--radio);
   color: var(--textoSecundario);
-  text-transform: uppercase;
-  font-size: var(--textoMini);
-  letter-spacing: 0.5px;
+  font-size: var(--textoChico);
+}
+
+.selectorEditor:hover {
+  background-color: var(--botonInterno);
+  color: var(--textoPrincipal);
 }
 
 .separador {
   flex: 1 1 auto;
 }
 
-.botonCabecera {
-  padding: 3px 9px;
+.separadorChico {
+  flex: 0 0 6px;
 }
 
 .ventanaViewport {
   position: relative;
   overflow: hidden;
+  background: var(--gradienteViewport);
 }
 
 .lienzoViewport {
@@ -188,10 +191,14 @@ button {
   cursor: crosshair;
 }
 
+/* --- Barras laterales (toolbar y sidebar) --- */
+
 .barraLateral {
   display: flex;
   flex-direction: column;
   background-color: var(--fondoPanel);
+  border: var(--grosorBorde) solid var(--borde);
+  border-radius: var(--radioArea);
   overflow: hidden;
   position: relative;
 }
@@ -199,10 +206,12 @@ button {
 .cabeceraBarra {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: var(--grosorBorde) solid var(--bordeSutil);
+  justify-content: flex-end;
+  height: 24px;
+  padding: 0 4px;
+  border-bottom: var(--grosorBorde) solid var(--borde);
   flex: 0 0 auto;
+  background-color: var(--fondoPanelCabecera);
 }
 
 .tituloBarra {
@@ -212,39 +221,59 @@ button {
   letter-spacing: 0.4px;
 }
 
-.botonColapsar {
-  padding: 0 4px;
+.listaHerramientas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 6px 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
 }
 
-.asaRedimension {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -3px;
-  width: 6px;
-  cursor: col-resize;
+.pestanasSidebar {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--fondoPanelCabecera);
+  border-bottom: var(--grosorBorde) solid var(--borde);
+  flex: 0 0 auto;
 }
 
-.asaRedimensionIzquierda {
-  right: auto;
-  left: -3px;
+.pestanaCuerpo {
+  display: flex;
+  flex-direction: column;
 }
 
-.asaRedimension:hover {
-  background-color: var(--acentoNaranja);
+.cuerpoSidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+
+/* --- Pie / status bar --- */
 
 .pieViewport {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 10px;
-  background-color: var(--fondoHeader);
+  gap: 12px;
+  padding: 0 8px;
+  background-color: var(--fondoStatusbar);
   border-top: var(--grosorBorde) solid var(--borde);
-  font-size: var(--textoMini);
-  color: var(--textoSecundario);
+  font-size: var(--textoChico);
+  color: var(--textoStatusbar);
   overflow: hidden;
   white-space: nowrap;
+}
+
+.grupoPie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.grupoPieDerecha {
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
 .datoViewport {
@@ -252,162 +281,31 @@ button {
 }
 
 .ayudaViewport {
+  color: var(--textoStatusbar);
+}
+
+.punto {
   color: var(--textoDeshabilitado);
-}
-
-/* --- Paneles y campos --- */
-
-.panel {
-  border-bottom: var(--grosorBorde) solid var(--bordeSutil);
-  flex: 0 0 auto;
-}
-
-.cabeceraPanel {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  padding: 6px 8px;
-  text-align: left;
-}
-
-.cuerpoPanel {
-  padding: 8px;
-  border-top: var(--grosorBorde) solid var(--bordeSutil);
-}
-
-.camposPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filaCampo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.etiquetaCampo {
-  color: var(--textoSecundario);
-}
-
-.selectorCampo,
-.numeroCampo {
-  background-color: var(--fondoInput);
-  color: var(--textoPrincipal);
-  border: var(--grosorBorde) solid var(--borde);
-  border-radius: var(--radioPanel);
-  padding: 3px 6px;
-}
-
-.selectorCampo {
-  flex: 1 1 auto;
-  max-width: 140px;
-}
-
-.numeroCampo {
-  width: 100px;
-}
-
-.casillaCampo {
-  accent-color: var(--acentoAzul);
-}
-
-.rangoCampo {
-  flex: 1 1 auto;
-  accent-color: var(--acentoAzul);
-}
-
-.valorCampo {
-  align-self: flex-end;
-  color: var(--textoSecundario);
-  font-variant-numeric: tabular-nums;
-}
-
-.lecturaCampo {
-  color: var(--textoSecundario);
-  font-family: var(--fuenteMono);
-  font-size: var(--textoMini);
-  line-height: 1.4;
-}
-
-.botonPanel {
-  padding: 5px 10px;
-  color: var(--textoPrincipal);
-}
-
-/* --- Herramientas --- */
-
-.listaHerramientas {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.botonHerramienta {
-  padding: 5px 8px;
-  text-align: left;
-}
-
-.botonHerramientaActiva {
-  background-color: var(--fondoActivo);
-  color: var(--textoPrincipal);
-  outline: var(--grosorBorde) solid var(--acentoAzul);
-}
-
-/* --- Menús --- */
-
-.menu {
-  position: relative;
-}
-
-.disparadorMenu {
-  padding: 3px 9px;
-}
-
-.desplegableMenu {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  z-index: 100;
-  min-width: 180px;
-  padding: 4px;
-  background-color: var(--fondoPanel);
-  border: var(--grosorBorde) solid var(--borde);
-  border-radius: var(--radioPanel);
-  box-shadow: var(--sombraMenu);
-}
-
-.elementoMenu {
-  display: block;
-  width: 100%;
-  padding: 5px 8px;
-  text-align: left;
-  color: var(--textoPrincipal);
-}
-
-.elementoMenu:disabled {
-  color: var(--textoDeshabilitado);
-  cursor: default;
 }
 
 /* --- Outliner --- */
 
 .cabeceraOutliner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   background-color: var(--fondoHeader);
   border-bottom: var(--grosorBorde) solid var(--borde);
-  padding: 6px 8px;
+  padding: 0 6px;
+  height: var(--alturaHeader);
   color: var(--textoSecundario);
-  text-transform: uppercase;
-  font-size: var(--textoMini);
-  letter-spacing: 0.5px;
+  font-size: var(--textoChico);
 }
 
 .ventanaOutliner {
   flex: 1 1 auto;
   overflow-y: auto;
+  background-color: #282828;
 }
 
 .listaOutliner {
@@ -420,16 +318,72 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   color: var(--textoSecundario);
+  font-size: var(--textoChico);
 }
 
 .elementoOutliner:hover {
-  background-color: var(--fondoHover);
+  background-color: #333333;
   color: var(--textoPrincipal);
 }
 
+.elementoOutliner.activo {
+  background-color: #334d80;
+  color: #ffffff;
+}
+
 .iconoOutliner {
+  display: inline-flex;
   width: 16px;
-  text-align: center;
+  color: var(--textoSecundario);
+}
+
+/* --- Gizmo de navegación --- */
+
+.gizmoNavegacion {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 68px;
+  height: 68px;
+  cursor: grab;
+  opacity: 0.92;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.gizmoNavegacion:active {
+  cursor: grabbing;
+}
+
+.gizmoNavegacion text {
+  font-family: var(--fuentePrincipal);
+  font-weight: 700;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.gizmoEje {
+  cursor: pointer;
+}
+
+/* --- Asas de redimensionado de regiones --- */
+
+.asaRedimension {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+.asaRedimensionIzquierda {
+  right: auto;
+  left: -3px;
+}
+
+.asaRedimension:hover {
+  background-color: rgba(255, 255, 255, 0.08);
 }

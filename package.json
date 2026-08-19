@@ -17,6 +17,7 @@
     "quality:doctor": "sentinel doctor --json"
   },
   "dependencies": {
+    "lucide": "^1.32.0",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
