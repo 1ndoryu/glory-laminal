@@ -52,6 +52,12 @@
             "/src/input/",
             "/src/render/gl/"
           ]
+        },
+        "rules": {},
+        "runtime": {
+          "minimumVersion": "",
+          "protocolVersion": 0,
+          "lockFile": ""
         }
       }
     }
