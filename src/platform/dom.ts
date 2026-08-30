@@ -25,6 +25,22 @@ export function createElement<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
+/* Accesos a `window` que no sean de interacción directa con un elemento, aislados
+   aqui para que los editores no referencien `window` por fuera del boundary
+   (regla window-reference-outside-platform). Los timers y el viewport se piden
+   por estos helpers. */
+export function viewportSize(): { width: number; height: number } {
+  return { width: window.innerWidth, height: window.innerHeight };
+}
+
+export function setWindowTimeout(handler: () => void, delay: number): number {
+  return window.setTimeout(handler, delay);
+}
+
+export function clearWindowTimeout(handle: number): void {
+  window.clearTimeout(handle);
+}
+
 /* Convierte un arrastre de puntero en deltas (dx, dy) con pointer capture. */
 export function onDrag(
   element: HTMLElement,

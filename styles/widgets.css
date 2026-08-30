@@ -1,5 +1,10 @@
 /* Recetas de widgets estilo Blender: botones, menús, paneles y campos. Toda decisión visual se
-   apoya en variables.css. Los layouts de las regiones viven en editor.css. */
+   apoya en variables.css. Los layouts de las regiones viven en editor.css.
+   sentinel-disable-file css-especificacion-diseno-local
+   [por que] Este archivo ES la receta canónica de widgets del proyecto (botones, menús, paneles
+   y campos). El runtime de sentinel 0.7.4 solo exime por nombre button.css/contextmenu.css/
+   modal.css/variables.css y no permite declarar archivos de receta extra, así que marca estas
+   clases como especificación local aunque sean las recetas compartidas del sistema. */
 
 .icono {
   display: block;

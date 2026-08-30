@@ -1,4 +1,4 @@
-import { createElement } from '../../platform/dom';
+import { clearWindowTimeout, createElement, setWindowTimeout, viewportSize } from '../../platform/dom';
 
 const DELAY_MS = 250;
 const OFFSET_X = 14;
@@ -21,7 +21,7 @@ export function initTooltips(): () => void {
 
   const clearTimer = (): void => {
     if (showTimer !== null) {
-      window.clearTimeout(showTimer);
+      clearWindowTimeout(showTimer);
       showTimer = null;
     }
   };
@@ -37,8 +37,9 @@ export function initTooltips(): () => void {
   const place = (anchorX: number, anchorY: number): void => {
     const width = tooltip.offsetWidth;
     const height = tooltip.offsetHeight;
-    const maxX = window.innerWidth - MARGIN;
-    const maxY = window.innerHeight - MARGIN;
+    const { width: vw, height: vh } = viewportSize();
+    const maxX = vw - MARGIN;
+    const maxY = vh - MARGIN;
 
     let left = anchorX + OFFSET_X;
     let top = anchorY + OFFSET_Y;
@@ -99,7 +100,7 @@ export function initTooltips(): () => void {
     lastX = event.clientX;
     lastY = event.clientY;
     clearTimer();
-    showTimer = window.setTimeout(show, DELAY_MS);
+    showTimer = setWindowTimeout(show, DELAY_MS);
   };
 
   const onPointerMove = (event: PointerEvent): void => {
