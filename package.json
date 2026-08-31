@@ -14,7 +14,10 @@
     "fmt": "prettier --write .",
     "fmt:check": "prettier --check .",
     "analyze": "sentinel analyze --workspace . --format markdown",
-    "quality:doctor": "sentinel doctor --json"
+    "quality:doctor": "sentinel doctor --json",
+    "quality:setup": "node scripts/quality/quality-setup.mjs",
+    "quality:lock": "node scripts/quality/lock-generator.mjs",
+    "quality:lock:check": "node scripts/quality/lock-generator.mjs"
   },
   "dependencies": {
     "lucide": "^1.32.0",
