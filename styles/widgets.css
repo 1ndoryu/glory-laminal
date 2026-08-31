@@ -31,17 +31,17 @@
 
 .boton:hover {
   background-color: #5f5f5f;
-  border-color: #4a4a4a;
+  border-color: var(--interaccion);
 }
 
 .boton:active {
-  background-color: #4a4a4a;
+  background-color: var(--interaccion);
 }
 
 .boton[aria-pressed='true'] {
   background-color: var(--seleccion);
   border-color: var(--seleccionBorde);
-  color: #ffffff;
+  color: var(--textoSeleccion);
 }
 
 /* Botón de menú de header: texto plano, resalta al hover como los menús de Blender. */
@@ -81,7 +81,7 @@
 
 .botonIcono.activo {
   background-color: var(--seleccion);
-  color: #ffffff;
+  color: var(--textoSeleccion);
 }
 
 /* --- Grupos de iconos (shading del header) --- */
@@ -112,8 +112,8 @@
 
 .grupoIconos .botonIcono.activo {
   background-color: var(--seleccion);
-  border-radius: 3px;
-  color: #ffffff;
+  border-radius: var(--radioArea);
+  color: var(--textoSeleccion);
 }
 
 /* --- Paneles --- */
@@ -136,7 +136,7 @@
 }
 
 .cabeceraPanel:hover {
-  background-color: #4a4a4a;
+  background-color: var(--interaccion);
 }
 
 .flechaPanel {
@@ -201,7 +201,7 @@
 
 .selectorCampo:hover,
 .numeroCampo:hover {
-  border-color: #4a4a4a;
+  border-color: var(--interaccion);
 }
 
 .selectorCampo:focus,
@@ -282,13 +282,13 @@
   padding: 5px 9px;
   text-align: left;
   color: var(--textoMenu);
-  border-radius: 2px;
+  border-radius: var(--radioFino);
   font-size: var(--textoChico);
 }
 
 .elementoMenu:hover:not(:disabled) {
   background-color: var(--fondoHoverMenu);
-  color: #ffffff;
+  color: var(--textoSeleccion);
 }
 
 .elementoMenu:disabled {

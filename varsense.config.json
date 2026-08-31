@@ -5,7 +5,8 @@
   "includePatterns": [
     "src/**/*.css",
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "styles/**/*.css"
   ],
   "excludePatterns": [
     "**/node_modules/**",

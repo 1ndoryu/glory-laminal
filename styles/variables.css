@@ -8,20 +8,26 @@
   --fondoBase: #1d1d1d; /* fondo del editor (wcol_regular.item) */
   --fondoTopbar: #181818; /* space_topbar.back */
   --fondoStatusbar: #303030; /* space_statusbar.back */
-  --fondoHeader: #303030; /* space_view3d.header */
-  --fondoPanel: #303030; /* space_properties / sidebars */
+  /* [308A-6GL] Los pares siguientes reproducen el valor de su token canónico
+     (misma superficie en el tema): se declaran como alias para conservar el
+     nombre semántico sin duplicar el literal. */
+  --fondoHeader: var(--fondoStatusbar); /* space_view3d.header */
+  --fondoPanel: var(--fondoStatusbar); /* space_properties / sidebars */
   --fondoPanelCabecera: #3d3d3d; /* panel_header / panel_back */
-  --fondoInput: #1d1d1d; /* wcol_text.inner */
-  --fondoInputSel: #181818; /* wcol_text.inner_sel */
+  --fondoInput: var(--fondoBase); /* wcol_text.inner */
+  --fondoInputSel: var(--fondoTopbar); /* wcol_text.inner_sel */
   --botonInterno: #545454; /* wcol_regular.inner */
   --botonInternoMenu: #282828; /* wcol_menu.inner */
   --fondoHover: #3a3a3a;
   --fondoHoverMenu: #4772b3; /* wcol_menu_item.inner_sel */
-  --seleccion: #4772b3; /* panel_active / inner_sel (azul de selección) */
+  /* [308A-6GL] Gris medio de interacción (hover/activo de controles,
+     wcol_regular.inner_sel): consumido por botón, panel y campos. */
+  --interaccion: #4a4a4a;
+  --seleccion: var(--fondoHoverMenu); /* panel_active / inner_sel (azul de selección) */
   --seleccionBorde: #5680c2;
 
   /* Bordes */
-  --borde: #3d3d3d; /* wcol_regular.outline */
+  --borde: var(--fondoPanelCabecera); /* wcol_regular.outline */
   --bordeSuave: #333333;
   --editorBorde: #161616; /* editor_border */
   --editorContorno: rgba(255, 255, 255, 0.08); /* editor_outline */
@@ -33,6 +39,7 @@
   --textoMenu: #dddddd; /* wcol_menu_item.text */
   --textoDeshabilitado: #666666;
   --textoStatusbar: #838383; /* space_statusbar.text */
+  --textoSeleccion: #ffffff; /* texto sobre fondo de selección (wcol_menu_item.text) */
 
   /* Acentos (paleta Blender) */
   --acentoNaranja: #e87d0d; /* pestaña de workspace activa / objeto activo */
@@ -48,6 +55,7 @@
   /* Métricas y tipografía */
   --radio: 4px; /* roundness 0.2 sobre un botón de ~20px */
   --radioArea: 3px;
+  --radioFino: 2px; /* radios mínimos (asas de división, elementos de menú) */
   --grosorBorde: 1px;
   --fuentePrincipal: 'Segoe UI', 'Inter', 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif;
   --fuenteMono: 'Cascadia Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
