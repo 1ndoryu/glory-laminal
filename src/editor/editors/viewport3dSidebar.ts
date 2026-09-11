@@ -35,8 +35,6 @@ export function buildViewportSidebar(options: ViewportSidebarOptions): ViewportS
   const ui = createElement('aside', 'region barraLateral');
 
   const body = createElement('div', 'cuerpoSidebar');
-  body.style.overflowY = 'auto';
-  body.style.flex = '1 1 auto';
   ui.appendChild(body);
 
   body.append(buildViewPanel(), buildTerrainPanel(), buildRenderPanel());

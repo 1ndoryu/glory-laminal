@@ -51,11 +51,6 @@ export function buildViewportChrome(options: ViewportChromeOptions): ViewportChr
   window.appendChild(canvas);
   const footer = buildFooter();
 
-  header.style.gridArea = 'header';
-  window.style.gridArea = 'window';
-  sidebar.element.style.gridArea = 'ui';
-  footer.style.gridArea = 'footer';
-
   const sync = (state: EditorState): void => {
     wireframeIcon?.classList.toggle('activo', state.wireframe);
     solidIcon?.classList.toggle('activo', !state.wireframe);
