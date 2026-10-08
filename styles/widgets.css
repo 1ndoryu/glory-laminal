@@ -306,6 +306,8 @@
 
 .tooltipGlobal {
   position: fixed;
+  left: var(--tooltipX, var(--colapsoRegion));
+  top: var(--tooltipY, var(--colapsoRegion));
   z-index: 2000;
   max-width: 320px;
   padding: 4px 8px;

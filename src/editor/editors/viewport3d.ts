@@ -54,6 +54,7 @@ export class Viewport3DEditor implements EditorInstance {
     this.host = host;
     this.areaId = host.dataset.areaId ?? 'viewport';
     host.classList.add('area');
+    host.classList.add('areaViewport');
 
     this.chrome = buildViewportChrome({
       areaId: this.areaId,
@@ -119,20 +120,28 @@ export class Viewport3DEditor implements EditorInstance {
     const footerRegion = findRegion('FOOTER');
     const uiRegion = findRegion('UI');
 
-    this.host.style.display = 'grid';
-    this.host.style.gridTemplateAreas = '"header header" "window ui" "footer footer"';
-    this.host.style.gridTemplateColumns = `1fr ${uiRegion?.visible ? uiRegion.size : 0}px`;
-    this.host.style.gridTemplateRows = `${headerRegion?.visible ? headerRegion.size : 0}px 1fr ${footerRegion?.visible ? footerRegion.size : 0}px`;
+    /* Geometría viva vía custom properties (patrón exento); la plantilla fija
+       vive en `.areaViewport` y la visibilidad en `.oculto`. */
+    this.host.style.setProperty('--anchoUiViewport', `${uiRegion?.visible ? uiRegion.size : 0}px`);
+    this.host.style.setProperty(
+      '--altoCabeceraViewport',
+      `${headerRegion?.visible ? headerRegion.size : 0}px`,
+    );
+    this.host.style.setProperty(
+      '--altoPieViewport',
+      `${footerRegion?.visible ? footerRegion.size : 0}px`,
+    );
 
-    header.style.display = headerRegion?.visible ? '' : 'none';
-    footer.style.display = footerRegion?.visible ? '' : 'none';
-    ui.style.display = uiRegion?.visible ? '' : 'none';
+    header.classList.toggle('oculto', !(headerRegion?.visible ?? false));
+    footer.classList.toggle('oculto', !(footerRegion?.visible ?? false));
+    ui.classList.toggle('oculto', !(uiRegion?.visible ?? false));
   }
 
   dispose(): void {
     this.loop?.stop();
     this.unsubscribeStore?.();
     unregisterEditorInput(this.areaId);
+    this.host?.classList.remove('areaViewport');
     this.mesh?.dispose();
     this.grid?.dispose();
     this.terrainProgram?.dispose();

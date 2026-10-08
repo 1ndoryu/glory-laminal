@@ -29,3 +29,10 @@ entorno y el proyecto aún no publica `quality-tools.json` ni un comando oficial
 
 - `Agente/planes/plan-glory-laminal-2026-08-18.md` — plan maestro por fases (activo; fases 1–3
   completadas, fase 4 bloqueada).
+
+## Cerradas 08AA (2026-10-08)
+
+- **Seguridad deps**: `npm audit` 2 → 0 (brace-expansion 1.1.18→1.1.21 / 5.0.9→5.0.12,
+  source-map-js 1.2.1→1.2.2, solo lock). Se commitea además trabajo legítimo pendiente:
+  pins varsense 2.2.9, refactor editor a custom properties + AGENTS.md del proyecto.
+  Evidencia: `type-check` PASS + vitest 7 archivos / 40 tests PASS.

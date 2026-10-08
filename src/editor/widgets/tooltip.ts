@@ -54,8 +54,10 @@ export function initTooltips(): () => void {
     left = Math.max(MARGIN, Math.min(left, Math.max(MARGIN, maxX - width)));
     top = Math.max(MARGIN, Math.min(top, Math.max(MARGIN, maxY - height)));
 
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
+    /* Posición viva vía custom properties (patrón exento); el anclaje
+       `left`/`top` vive en `.tooltipGlobal`. */
+    tooltip.style.setProperty('--tooltipX', `${left}px`);
+    tooltip.style.setProperty('--tooltipY', `${top}px`);
   };
 
   const show = (): void => {

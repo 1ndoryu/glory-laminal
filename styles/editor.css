@@ -51,6 +51,20 @@ button {
   border-radius: var(--radioArea);
 }
 
+/* Huéspedes de editores: el layout lo declara el CSS, TS solo ajusta
+   custom properties runtime (--anchoUiViewport, ...) vía setProperty. */
+.areaOutliner {
+  display: flex;
+  flex-direction: column;
+}
+
+.areaViewport {
+  display: grid;
+  grid-template-areas: 'header header' 'window ui' 'footer footer';
+  grid-template-columns: 1fr var(--anchoUiViewport, var(--colapsoRegion));
+  grid-template-rows: var(--altoCabeceraViewport, var(--colapsoRegion)) 1fr var(--altoPieViewport, var(--colapsoRegion));
+}
+
 .division {
   display: grid;
   width: 100%;
@@ -75,10 +89,12 @@ button {
 
 .divisionFila {
   grid-auto-flow: column;
+  grid-template-columns: var(--divisionPrimera, 1fr) 4px var(--divisionSegunda, 1fr);
 }
 
 .divisionColumna {
   grid-auto-flow: row;
+  grid-template-rows: var(--divisionPrimera, 1fr) 4px var(--divisionSegunda, 1fr);
 }
 
 .divisionFila .asaDivision {
@@ -94,6 +110,14 @@ button {
 .region {
   min-width: 0;
   min-height: 0;
+}
+
+/* Visibilidad de regiones del layout vivo (TS la alterna con classList). */
+.cabeceraOutliner.oculto,
+.cabeceraViewport.oculto,
+.pieViewport.oculto,
+.barraLateral.oculto {
+  display: none;
 }
 
 .cabeceraViewport {
@@ -201,7 +225,7 @@ button {
   background-color: var(--fondoHeader);
   border-bottom: var(--grosorBorde) solid var(--borde);
   padding: 0 6px;
-  height: var(--alturaHeader);
+  height: var(--altoCabeceraOutliner, var(--alturaHeader));
   color: var(--textoSecundario);
   font-size: var(--textoChico);
 }

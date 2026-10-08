@@ -9,7 +9,7 @@ const CY = 34;
 const RADIUS = 26;
 const UP = new Vec3(0, 0, 1);
 
-/* Colores de eje del tema Blender (tokens --ejeX/--ejeY/--ejeZ de variables.css). */
+/* Colores de eje de la paleta Blender (literales para atributos de presentación SVG). */
 const AXES: ReadonlyArray<{ id: string; label: string; axis: Vec3; color: string }> = [
   { id: 'X', label: 'X', axis: new Vec3(1, 0, 0), color: '#ff3352' },
   { id: 'Y', label: 'Y', axis: new Vec3(0, 1, 0), color: '#8bdc00' },

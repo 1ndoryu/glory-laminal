@@ -26,8 +26,7 @@ export class OutlinerEditor implements EditorInstance {
 
   mount(host: HTMLElement): void {
     this.host = host;
-    host.style.display = 'flex';
-    host.style.flexDirection = 'column';
+    host.classList.add('areaOutliner');
 
     const header = createElement('div', 'region cabeceraOutliner');
     header.append(buildEditorSelector(host.dataset.areaId ?? 'outliner', 'outliner'));
@@ -52,11 +51,13 @@ export class OutlinerEditor implements EditorInstance {
       return;
     }
     const header = regions.find((region) => region.type === 'HEADER');
-    this.header.style.height = `${header?.visible ? header.size : 0}px`;
-    this.header.style.display = header?.visible ? '' : 'none';
+    /* Altura viva vía custom property (patrón exento); visibilidad con clase. */
+    this.header.style.setProperty('--altoCabeceraOutliner', `${header?.visible ? header.size : 0}px`);
+    this.header.classList.toggle('oculto', !(header?.visible ?? false));
   }
 
   dispose(): void {
+    this.host?.classList.remove('areaOutliner');
     this.host = null;
     this.header = null;
   }

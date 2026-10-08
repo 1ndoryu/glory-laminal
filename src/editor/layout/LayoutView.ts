@@ -107,14 +107,9 @@ export class LayoutView {
   private applyRatio(root: HTMLElement, orientation: SplitOrientation, ratio: number): void {
     root.classList.toggle('divisionFila', orientation === 'row');
     root.classList.toggle('divisionColumna', orientation === 'column');
-    const first = `${(ratio * 100).toFixed(2)}%`;
-    const second = `${((1 - ratio) * 100).toFixed(2)}%`;
-    if (orientation === 'row') {
-      root.style.gridTemplateColumns = `${first} 4px ${second}`;
-      root.style.gridTemplateRows = '';
-    } else {
-      root.style.gridTemplateRows = `${first} 4px ${second}`;
-      root.style.gridTemplateColumns = '';
-    }
+    /* Proporción viva vía custom properties (patrón exento); la plantilla con
+       el asa de 4px vive en `.divisionFila` / `.divisionColumna`. */
+    root.style.setProperty('--divisionPrimera', `${(ratio * 100).toFixed(2)}%`);
+    root.style.setProperty('--divisionSegunda', `${((1 - ratio) * 100).toFixed(2)}%`);
   }
 }

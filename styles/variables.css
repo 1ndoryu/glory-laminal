@@ -6,7 +6,6 @@
 :root {
   /* Superficies (wcol_* / space_* del tema por defecto) */
   --fondoBase: #1d1d1d; /* fondo del editor (wcol_regular.item) */
-  --fondoTopbar: #181818; /* space_topbar.back */
   --fondoStatusbar: #303030; /* space_statusbar.back */
   /* [308A-6GL] Los pares siguientes reproducen el valor de su token canónico
      (misma superficie en el tema): se declaran como alias para conservar el
@@ -15,10 +14,8 @@
   --fondoPanel: var(--fondoStatusbar); /* space_properties / sidebars */
   --fondoPanelCabecera: #3d3d3d; /* panel_header / panel_back */
   --fondoInput: var(--fondoBase); /* wcol_text.inner */
-  --fondoInputSel: var(--fondoTopbar); /* wcol_text.inner_sel */
   --botonInterno: #545454; /* wcol_regular.inner */
   --botonInternoMenu: #282828; /* wcol_menu.inner */
-  --fondoHover: #3a3a3a;
   --fondoHoverMenu: #4772b3; /* wcol_menu_item.inner_sel */
   /* [308A-6GL] Gris medio de interacción (hover/activo de controles,
      wcol_regular.inner_sel): consumido por botón, panel y campos. */
@@ -31,7 +28,6 @@
   --bordeSuave: #333333;
   --editorBorde: #161616; /* editor_border */
   --editorContorno: rgba(255, 255, 255, 0.08); /* editor_outline */
-  --panelContorno: rgba(255, 255, 255, 0.07); /* panel_outline */
 
   /* Texto */
   --textoPrincipal: #e6e6e6;
@@ -40,17 +36,6 @@
   --textoDeshabilitado: #666666;
   --textoStatusbar: #838383; /* space_statusbar.text */
   --textoSeleccion: #ffffff; /* texto sobre fondo de selección (wcol_menu_item.text) */
-
-  /* Acentos (paleta Blender) */
-  --acentoNaranja: #e87d0d; /* pestaña de workspace activa / objeto activo */
-  --acentoNaranjaClaro: #ffaf29; /* active_object */
-  --ejeX: #ff3352; /* xaxis */
-  --ejeY: #8bdc00; /* yaxis */
-  --ejeZ: #2890ff; /* zaxis */
-  --info: #28487d;
-  --exito: #188625;
-  --advertencia: #ac8737;
-  --error: #991616;
 
   /* Métricas y tipografía */
   --radio: 4px; /* roundness 0.2 sobre un botón de ~20px */
@@ -61,9 +46,9 @@
   --fuenteMono: 'Cascadia Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   /* Editor */
-  --alturaTopbar: 32px;
   --alturaHeader: 26px;
-  --alturaStatusbar: 22px;
+  /* Valor neutro para regiones colapsadas y posición inicial del tooltip. */
+  --colapsoRegion: 0px;
   --textoChico: 11px;
   --textoMini: 10px;
   --sombraMenu: 0 6px 16px rgba(0, 0, 0, 0.5);
