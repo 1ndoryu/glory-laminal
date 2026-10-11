@@ -18,11 +18,14 @@
       "npxTools": [
         "eslint",
         "tsc",
-        "typescript"
+        "typescript",
+        "vitest"
       ],
       "cargoSubcommands": [],
       "tools": [
-        "git"
+        "tsc",
+        "vitest",
+        "eslint"
       ]
     }
   },
