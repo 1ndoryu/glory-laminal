@@ -1,4 +1,5 @@
 # Plan maestro — Glory Laminal (2026-08-18)
+> **Revisión 2026-10-13:** sigue abierto, pendiente de un hecho externo o manual.
 
 ## Objetivo
 
