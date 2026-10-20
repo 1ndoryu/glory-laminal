@@ -7,22 +7,24 @@ WebGL2 propio + DOM/CSS vanilla + Zustand + Sentinel. Fuentes canónicas: `READM
 
 ## Siguiente bloque
 
-Nada en cola. `188A-5` se borró el 2026-10-20: su premisa («el binario `varsense` está ausente y el
-proyecto no publica `quality-tools.json` ni `quality:setup`») era falsa — varsense **2.2.9** está
-fijado en `sentinel.lock.json:19-23` y el proyecto ya publica `quality-tools.json`,
-`varsense.config.json` y los scripts `quality:*`.
+Nada en cola. **Sin tareas abiertas**: las dos últimas se descartaron por decisión de la usuaria el
+2026-10-20 — `188A-5` partía de una premisa falsa (decía que VarSense estaba ausente y que el
+proyecto no publicaba `quality-tools.json` ni `quality:setup`, y varsense **2.2.9** ya está fijado en
+`sentinel.lock.json:19-23`) y `188A-6` era un cajón de sastre sin alcance (assets, ECS, sistemas de
+juego y voxel en una sola línea). Ver `Agente/completados/tareas-2026-10-20.md`.
+
+Retomar el motor exige abrir una tarea nueva con alcance de verdad, no reabrir estas.
 
 ## Pendientes
 
-- [ ] `188A-6` — **Backlog lejano** (fuera de alcance inmediato): manejo de assets, ECS/entidades,
-  sistemas de juego, voxel/Minecraft.
+Nada en cola.
 
 ## Bloqueos
 
-Nada bloqueado. El antiguo bloqueo de VarSense («clonar/compilar el binario, commit `88f281f…`,
-v2.2.1») era falso y se retiró el 2026-10-20 con `188A-5`.
+Nada bloqueado. El bloqueo de VarSense («clonar/compilar el binario, commit `88f281f…`, v2.2.1»)
+era falso y se retiró el 2026-10-20.
 
 ## Planes activos
 
-- `Agente/planes/plan-glory-laminal-2026-08-18.md` — plan maestro por fases (fases 1–3 completadas,
-  fase 4 bloqueada).
+Ninguno. El plan maestro por fases se cerró el 2026-10-20 (fases 0–3 completadas y verificadas; 4 y 5
+descartadas) y vive en `Agente/planes/completados/plan-glory-laminal-2026-08-18.md`.
