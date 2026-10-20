@@ -7,11 +7,10 @@ WebGL2 propio + DOM/CSS vanilla + Zustand + Sentinel. Fuentes canónicas: `READM
 
 ## Siguiente bloque
 
-- [ ] `188A-5` — **Gate completo (VarSense).** Bloqueado: el binario `varsense` está ausente en este
-  entorno y el proyecto aún no publica `quality-tools.json` ni un comando oficial de setup
-  (`quality:setup`). Provisionar requiere alinear el manifest con el commit de
-  `https://github.com/1ndoryu/varsense.git`, ejecutar el build publicado y regenerar el lock.
-  Incluye `varsense.config.json` y el adaptador de stages.
+Nada en cola. `188A-5` se borró el 2026-10-20: su premisa («el binario `varsense` está ausente y el
+proyecto no publica `quality-tools.json` ni `quality:setup`») era falsa — varsense **2.2.9** está
+fijado en `sentinel.lock.json:19-23` y el proyecto ya publica `quality-tools.json`,
+`varsense.config.json` y los scripts `quality:*`.
 
 ## Pendientes
 
@@ -20,8 +19,8 @@ WebGL2 propio + DOM/CSS vanilla + Zustand + Sentinel. Fuentes canónicas: `READM
 
 ## Bloqueos
 
-- **VarSense sin decidir:** clonar/compilar el binario (commit `88f281f…`, v2.2.1) o aportar un
-  artefacto ya compilado. Hasta entonces no se afirma PASS de VarSense.
+Nada bloqueado. El antiguo bloqueo de VarSense («clonar/compilar el binario, commit `88f281f…`,
+v2.2.1») era falso y se retiró el 2026-10-20 con `188A-5`.
 
 ## Planes activos
 
