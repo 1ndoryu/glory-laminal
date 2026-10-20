@@ -16,3 +16,6 @@ dist/
 
 # Documentacion local del area (planes, tareas, lecciones): fuera del repo publico.
 Agente/
+# alta 10AA-2 F10
+target/
+.runtime/
