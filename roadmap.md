@@ -27,4 +27,4 @@ era falso y se retiró el 2026-10-20.
 ## Planes activos
 
 Ninguno. El plan maestro por fases se cerró el 2026-10-20 (fases 0–3 completadas y verificadas; 4 y 5
-descartadas) y vive en `Agente/planes/completados/plan-glory-laminal-2026-08-18.md`.
+descartadas).
